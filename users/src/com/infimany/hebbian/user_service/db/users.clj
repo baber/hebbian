@@ -5,9 +5,9 @@
   (:require [monger.collection :as monger-coll])
   (:require [closchema.core :as schema])
   (:require [clojure.java.io :as io])
-  
+
   (:import [com.mongodb MongoOptions ServerAddress])
-  (:import [java.io File])  
+  (:import [java.io File])
   (:import [org.bson.types ObjectId]
            [com.mongodb DB WriteConcern]))
 
@@ -17,8 +17,8 @@
 
 (def schemas
   (let [schema-files  (filter #(.endsWith (.getName %) ".json")  (file-seq (io/as-file schemas-path)))]
-    (zipmap (map #(keyword (.getName %)) schema-files) (map #(parse-string (slurp %)) schema-files))
-    ) 
+    (zipmap (map #(keyword (.getName %)) schema-files) (map #(parse-string (slurp %) true) schema-files))
+    )
   )
 
 ; db related functions
@@ -41,6 +41,7 @@
 (defn validate-json [data schema]
    (schema/validate ((keyword schema) schemas)  data )
   )
+
 
 
 

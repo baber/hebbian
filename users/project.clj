@@ -6,9 +6,10 @@ learning principles to ensure users are only shown offers they are likely to res
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [com.novemberain/monger "1.5.0"]
-                 [com.novemberain/monger "1.5.0"]
                  [bigml/closchema "0.5"]
-		 [cheshire "5.3.1"]]
+		             [cheshire "5.3.1"]
+                 [lein-light-nrepl "0.0.13"]]
 
-  :profiles {:dev {:resource-paths ["test-resources"] }} 
-)
+  :profiles {:dev {:resource-paths ["test-resources"] }}
+
+  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]})
