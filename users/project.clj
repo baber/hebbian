@@ -8,8 +8,15 @@ learning principles to ensure users are only shown offers they are likely to res
                  [com.novemberain/monger "1.5.0"]
                  [bigml/closchema "0.5"]
 		             [cheshire "5.3.1"]
-                 [lein-light-nrepl "0.0.13"]]
+                 [lein-light-nrepl "0.0.13"]
+                 [compojure "1.1.6"]]
 
-  :profiles {:dev {:resource-paths ["test-resources"] }}
+
+  :plugins [[lein-ring "0.8.10"]]
+  :ring {:handler com.infimany.hebbian.user-service.rest.handlers/app}
+
+  :profiles {:dev {:resource-paths ["test-resources"]
+             :dependencies [[javax.servlet/servlet-api "2.5"]
+                        [ring-mock "0.1.5"]]}}
 
   :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]})

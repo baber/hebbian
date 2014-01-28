@@ -2,6 +2,7 @@
   (:require [clojure.core])
   (:require [cheshire.core :refer [parse-string]])
   (:require [monger.core])
+  (:require [monger.json])
   (:require [monger.collection :as monger-coll])
   (:require [closchema.core :as schema])
   (:require [clojure.java.io :as io])
@@ -23,13 +24,14 @@
 
 ; db related functions
 
-;(monger.core/connect!)
+(monger.core/connect!)
 
-;(monger.core/set-db! (monger.core/get-db "test"))
+(monger.core/set-db! (monger.core/get-db "test"))
 
 (defn get-user [id]
-    (monger-coll/find-maps "users")
+    (monger-coll/find-one-as-map "users" {:_id (ObjectId. id)})
     )
+
 
 (defn insert-user [user]
   (monger-coll/insert "users" user))
@@ -41,16 +43,5 @@
 (defn validate-json [data schema]
    (schema/validate ((keyword schema) schemas)  data )
   )
-
-
-
-
-
-
-
-
-
-
-
 
 
