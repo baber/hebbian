@@ -6,6 +6,7 @@
   (:require [monger.collection :as monger-coll])
   (:require [closchema.core :as schema])
   (:require [clojure.java.io :as io])
+  (:use [slingshot.slingshot :only [throw+]])
 
   (:import [com.mongodb MongoOptions ServerAddress])
   (:import [java.io File])
@@ -22,11 +23,19 @@
     )
   )
 
-; db related functions
+; db setup related functions
 
 (monger.core/connect!)
 
 (monger.core/set-db! (monger.core/get-db "test"))
+
+; json validation functions
+
+(defn validate-json [data schema]
+  (schema/validate ((keyword schema) schemas) data )
+  )
+
+; db data access functions
 
 (defn get-user [id]
     (monger-coll/find-one-as-map "users" {:_id (ObjectId. id)})
@@ -34,14 +43,13 @@
 
 
 (defn insert-user [user]
-  (monger-coll/insert "users" user))
-
-
-
-; json validation functions
-
-(defn validate-json [data schema]
-   (schema/validate ((keyword schema) schemas)  data )
+  (cond
+   (empty? user) (throw+ {:type :invalid_json :message "Posted JSON is empty"} )
+   (validate-json user "user-v1.json") (monger-coll/insert "users" user)
+   :else (throw+ {:type :invalid_json :message "Posted JSON is not valid"} ) )
   )
+
+
+
 
 
