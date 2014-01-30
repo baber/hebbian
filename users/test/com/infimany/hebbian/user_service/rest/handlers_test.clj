@@ -9,17 +9,41 @@
             ))
 
 
-
-; tests
+; test data
 
 (def test-user (parse-string (slurp (resource "./valid_user.json")) true))
 
-(deftest handler-test
-  ; setup
-  (users/insert-user test-user)
-  ; test
-  (is (= (handlers/app (request :get (str "/user/" (:identity-id test-user))) )
+; fixtures
+
+(defn delete-test-user [f]
+  (users/delete-user (:identity-id test-user))
+  (f)
+  )
+
+
+(use-fixtures :each delete-test-user)
+
+; tests
+
+(deftest handler-GET
+    ; setup
+    (users/insert-user test-user)
+    ; test
+    (is (= (handlers/app (request :get (str "/user/" (:identity-id test-user))) )
+           {:status 200
+            :headers {"Content-Type" "application/json; charset=utf-8" }
+            :body (generate-string test-user)}))
+)
+
+
+(deftest handler-POST
+  (is (empty? (users/get-user (:identity-id test-user))) )
+  (is (= (handlers/app (body (content-type (request :post "/user") "application/json") (generate-string test-user)) )
          {:status 200
-          :headers {"Content-Type" "application/json; charset=utf-8" }
-          :body (generate-string test-user)})))
+          :headers {}
+          :body ""}))
+
+  (is (= test-user(users/get-user (:identity-id test-user))))
+
+  )
 

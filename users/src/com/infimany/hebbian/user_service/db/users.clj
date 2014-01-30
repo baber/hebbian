@@ -49,5 +49,6 @@
    :else (throw+ {:type :invalid_json :message "Posted JSON is not valid"} ) )
   )
 
-
+(defn delete-user [identity-id]
+  (monger-coll/remove "users" {:identity-id identity-id}))
 
