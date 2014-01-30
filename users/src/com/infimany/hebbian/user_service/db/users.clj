@@ -37,8 +37,8 @@
 
 ; db data access functions
 
-(defn get-user [id]
-    (monger-coll/find-one-as-map "users" {:_id (ObjectId. id)})
+(defn get-user [identity-id]
+  (dissoc (monger-coll/find-one-as-map "users" {:identity-id identity-id}) :_id)
     )
 
 
@@ -48,8 +48,6 @@
    (validate-json user "user-v1.json") (monger-coll/insert "users" user)
    :else (throw+ {:type :invalid_json :message "Posted JSON is not valid"} ) )
   )
-
-
 
 
 

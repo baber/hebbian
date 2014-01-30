@@ -10,9 +10,10 @@ learning principles to ensure users are only shown offers they are likely to res
 		             [cheshire "5.3.1"]
                  [lein-light-nrepl "0.0.13"]
                  [compojure "1.1.6"]
-                 [ring/ring-json "0.2.0"]
                  [slingshot "0.10.3"]
-                 [ring/ring-devel "1.2.1"]]
+                 [ring/ring-devel "1.2.1"]
+                 [ring/ring-json "0.2.0"]
+                 [ring-mock "0.1.5"]]
 
 
   :plugins [[lein-ring "0.8.10"]]
