@@ -1,36 +1,20 @@
-(ns app-pedestal.services)
+(ns app-pedestal.services
+  (:require [io.pedestal.app.protocols :as p]
+            [cljs.reader :as reader]
+            [goog.net.XhrIo :as xhr]
+            [cljs.core.async :as async :refer [chan close! <! >!]]
+            [io.pedestal.app.messages :as msg])
+  (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
-;; The services namespace responsible for communicating with back-end
-;; services. It receives messages from the application's behavior,
-;; makes requests to services and sends responses back to the
-;; behavior.
-;;
-;; This namespace will usually contain a function which can be
-;; configured to receive effect events from the behavior in the file
-;;
-;; app/src/app_pedestal/start.cljs
-;;
-;; After creating a new application, set the effect handler function
-;; to receive effects
-;;
-;; (app/consume-effect app services-fn)
-;;
-;; A very simple example of a services function which echoes all events
-;; back to the behavior is shown below.
 
-(comment
+(defn get-user [message input-queue]
+  (xhr/send (str "http://localhost:3000/user/" (:value message))
+            (fn [event]
+              (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
+                (p/put-message input-queue
+                               {msg/type :user msg/topic [:user-details] :value res}
+                               )))))
 
-  ;; The services implementation will need some way to send messages
-  ;; back to the application. The queue passed to the services function
-  ;; will convey messages to the application.
-  (defn echo-services-fn [message queue]
-    (put-message queue message))
+(defn services-fn [message input-queue]
+  (get-user message input-queue))
 
-  )
-
-;; During development, it is helpful to implement services which
-;; simulate communication with the real services. This implementation
-;; can be placed in the file:
-;;
-;; app/src/app_pedestal/simulated/services.cljs
-;;

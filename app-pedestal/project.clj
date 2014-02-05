@@ -9,7 +9,8 @@
                  [com.cemerick/piggieback "0.1.0"]
                  [lein-light-nrepl "0.0.13"]
                  [cljs-http "0.1.5"]
-                 [prismatic/dommy "0.1.2"]]
+                 [prismatic/dommy "0.1.2"]
+                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]]
   :min-lein-version "2.0.0"
   :source-paths ["app/src" "app/templates"]
   :resource-paths ["config"]

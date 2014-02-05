@@ -6,6 +6,7 @@
             [io.pedestal.app.messages :as msg]
             [app-pedestal.behavior :as behavior]
             [app-pedestal.rendering :as rendering]
+            [app-pedestal.services :as services]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [domina :as dom]
@@ -13,12 +14,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [dommy.macros :refer [node sel1 deftemplate]]))
 
-
-(defn fetch-user [app]
-  (go (let [response (<! (http/get "http://localhost:3001/user/123456" ))]
-        (p/put-message (:input app)
-                       {msg/type :user msg/topic [:new-details] :value (:body response)}
-                       ))))
 
 ;; In this namespace, the application is built and started.
 
@@ -28,9 +23,8 @@
         render-fn (push-render/renderer "content" (rendering/render-config) render/log-fn)
         ;; services-fn (fn [message input-queue] ...)
         app-model (render/consume-app-model app render-fn)]
-    ;; (app/consume-effects app services-fn)
-    (app/begin app)
-    (fetch-user app)
+        (app/begin app)
+    (app/consume-effects app services/services-fn)
     ;; Returning the app and app-model from the main function allows
     ;; the tooling to add support for useful features like logging
     ;; and recording.
