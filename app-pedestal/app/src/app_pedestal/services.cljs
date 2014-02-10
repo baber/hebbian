@@ -20,11 +20,12 @@
   (.log js/console (pr-str "Save user profile: " message))
   (xhr/send "http://localhost:3000/user"
             (fn [event]
-              (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
-                res))
-            "POST" (JSON.stringify (clj->js (:value message)))
-            (clj->js {"content-type" "application/json"})
-) )
+              (let [response (-> event .-target)]
+                (if (not (= 200 (.getStatus response)))
+                  (.log js/console (str "Failed to post user profile!  Server response: " (.getResponseText response))))) )
+              "POST" (JSON.stringify (clj->js (:value message)))
+              (clj->js {"content-type" "application/json"})
+              ) )
 
 
 

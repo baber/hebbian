@@ -3,7 +3,6 @@
   (:require [ring.util.response :as ring-utils])
   )
 
-
 (def http-errors {
                   :invalid_json 400})
 

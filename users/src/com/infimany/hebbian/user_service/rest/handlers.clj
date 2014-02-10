@@ -14,32 +14,25 @@
 
 (defroutes user-routes
   (GET "/user/:id" [id] {:body (get-user id)})
-  (GET "/user" [] {:body {}})
-  (POST "/user" {user :body} (println (type  user)) (insert-user user) {:body ""})
+  (POST "/user" {user :body} (insert-user user) {:body ""})
   (OPTIONS "/user" [] {:headers {
-                                 "Access-Control-Allow-Headers" "Origin, content-type, Referer, User-Agent"
+                                 "Access-Control-Allow-Headers" "content-type"
                                  "Access-Control-Allow-Methods" "POST"} :body ""})
   (route/resources "/")
   (route/not-found "Not Found"))
-
-
-
-
 
 
 (defn access-control [handler]
   (fn [request]
     (-> (handler request)
         (response/header "Access-Control-Allow-Origin" "*")
-        ;;(response/header "Access-Control-Allow-Headers" "origin, content-type")
-        ;;(response/header "Access-Control-Allow-Methods" "POST")
         )) )
 
 (def app
   (-> (handler/api user-routes)
       (ring-json/wrap-json-response)
       (ring-json/wrap-json-body {:keywords? true})
-      (access-control)
-      (wrap-exceptions)))
+      (wrap-exceptions)
+      (access-control)))
 
 

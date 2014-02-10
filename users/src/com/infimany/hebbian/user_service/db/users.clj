@@ -46,7 +46,7 @@
   (cond
    (empty? user) (throw+ {:type :invalid_json :message "Posted JSON is empty"} )
    (validate-json user "user-v1.json") (monger-coll/insert "users" user)
-   :else (throw+ {:type :invalid_json :message "Posted JSON is not valid"} ) )
+   :else (throw+ {:type :invalid_json :message (str "Posted JSON is not valid" (schema/report-errors (validate-json user "user-v1.json")) )} ) )
   )
 
 (defn delete-user [identity-id]
