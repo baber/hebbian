@@ -5,25 +5,25 @@
    [io.pedestal.app :as app]))
 
 
-(defn user-update [old-value new-value]
-  (.log js/console (pr-str "User Update Called!!!!"))
+(defn update-profile [old-value new-value]
+  (.log js/console (pr-str "Update Profile Called!!!!"))
   (:value new-value))
 
-(defn active-user [old-value new-value]
+(defn refresh-profile [old-value new-value]
   (:value new-value))
 
 (defn init-main [_]
-  [[:transform-enable [:main :user-details] :user [{msg/topic [:enable-button]}]]])
+  [[:transform-enable [:main :user-profile] :refresh [{msg/topic [:enable-button]}]]])
 
-(defn publish-effects [identity-id]
-  (.log js/console (pr-str "Publish Effects Called!!!!"))
-  [{msg/type :user msg/topic [:refresh] :value identity-id}]
+(defn publish-effects [user-details]
+  ;;(.log js/console (pr-str "Publish Effects Called: " user-details))
+  [{msg/type :update msg/topic [:user-profile] :value (:value (:message user-details))}]
   )
 
 (def example-app
   {:version 2
-   :transform [[:user [:user-details] user-update] [:user [:active-user] active-user]]
-   :effect #{[#{[:active-user]} publish-effects :single-val]}
+   :transform [[:update [:user-profile] update-profile] [:refresh [:user-profile] refresh-profile]]
+   :effect #{[#{[:user-profile]} publish-effects :single-va]}
    :emit [{:init init-main}
           [#{[:*]} (app/default-emitter [:main])]]})
 

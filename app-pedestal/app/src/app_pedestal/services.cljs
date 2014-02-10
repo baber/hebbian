@@ -7,14 +7,27 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
 
-(defn get-user [message input-queue]
-  (xhr/send (str "http://localhost:3000/user/" (:value message))
+(defn get-user [input-queue]
+  (xhr/send "http://localhost:3000/user/123456"
             (fn [event]
               (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
                 (p/put-message input-queue
-                               {msg/type :user msg/topic [:user-details] :value res}
+                               {msg/type :refresh msg/topic [:user-profile] :value res}
                                )))))
 
+
+(defn save-user-profile [message]
+  (.log js/console (pr-str "Save user profile: " message))
+  (xhr/send "http://localhost:3000/user"
+            (fn [event]
+              (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
+                res))
+            "POST" (JSON.stringify (clj->js (:value message)))
+            (clj->js {"content-type" "application/json"})
+) )
+
+
+
 (defn services-fn [message input-queue]
-  (get-user message input-queue))
+  (save-user-profile message))
 
