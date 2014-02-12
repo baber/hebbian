@@ -8,9 +8,48 @@
    [io.pedestal.app.protocols :as p]
    )
 
+  (:use
+   [React.DOM :only [table tbody tr td]]
+   )
+
   (:require-macros
    [dommy.macros :refer [node sel1 deftemplate]])
 )
+
+
+
+; using React library
+
+
+(def user-data #js [ #js ["one" "two" "three"] #js ["four" "five" "six"]])
+
+(defn create-user-table [user-details]
+  (table nil
+         (tbody nil
+                (.map user-details
+                      (fn [row]
+                        (tr nil (.map row (fn [cell](td nil cell))) ) ) )
+                ) )
+  )
+
+(def UserDetails
+  (js/React.createClass
+   #js {
+        :getInitialState (fn [] (this-as this #js{:user (.. this -props -user)}))
+        :render
+        (fn []
+          (this-as this (let [user-details (.. this -state -user)]
+                          (create-user-table user-details)
+                          )))
+        })
+  )
+
+
+
+
+(js/React.renderComponent
+ (UserDetails #js {:user user-data})
+ (.getElementById js/document "user-details"))
 
 
 (deftemplate create-user-node [user-details]
@@ -32,8 +71,8 @@
 
 
 (defn render-user-details [renderer [_ path old-value new-value] _]
-  (dommy/clear! (sel1 :#user-details))
-  (dommy/append! (sel1 :#user-details) (create-user-node new-value))
+;  (dommy/clear! (sel1 :#user-details))
+;  (dommy/append! (sel1 :#user-details) (create-user-node new-value))
 )
 
 

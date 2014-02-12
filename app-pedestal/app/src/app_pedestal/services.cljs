@@ -23,9 +23,9 @@
               (let [response (-> event .-target)]
                 (if (not (= 200 (.getStatus response)))
                   (.log js/console (str "Failed to post user profile!  Server response: " (.getResponseText response))))) )
-              "POST" (JSON.stringify (clj->js (:value message)))
-              (clj->js {"content-type" "application/json"})
-              ) )
+            "POST" (JSON.stringify (clj->js (:value message)))
+            (clj->js {"content-type" "application/json"})
+            ) )
 
 
 
