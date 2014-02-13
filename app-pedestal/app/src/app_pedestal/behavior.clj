@@ -6,8 +6,7 @@
 
 
 (defn update-profile [old-value new-value]
-  (.log js/console (pr-str "Update Profile Called!!!!"))
-  (:value new-value))
+    (:value new-value))
 
 (defn refresh-profile [old-value new-value]
   (:value new-value))
@@ -15,14 +14,14 @@
 (defn init-main [_]
   [[:transform-enable [:main :user-profile] :refresh [{msg/topic [:enable-button]}]]])
 
-(defn publish-effects [user-details]
-    [{msg/type :update msg/topic [:user-profile] :value (:value (:message user-details))}]
+(defn publish-user-details-effects [msg]
+    [(:message msg)]
   )
 
 (def example-app
   {:version 2
    :transform [[:update [:user-profile] update-profile] [:refresh [:user-profile] refresh-profile]]
-   :effect #{[#{[:user-profile]} publish-effects :single-va]}
+   :effect #{[#{[:user-profile]} publish-user-details-effects :default]}
    :emit [{:init init-main}
           [#{[:*]} (app/default-emitter [:main])]]})
 

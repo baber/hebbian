@@ -9,7 +9,7 @@
    )
 
   (:use
-   [React.DOM :only [table tbody tr td]]
+   [React.DOM :only [form input label div fieldset]]
    )
 
   (:require-macros
@@ -18,48 +18,61 @@
 
 
 
-; using React library
+; React components
 
+(def UserInputField
+  (js/React.createClass
+   #js {
+        :getInitialState (fn [] #js {})
 
-(def user-data #js [ #js ["one" "two" "three"] #js ["four" "five" "six"]])
+        :render
+        (fn []
+          (this-as this
+                   (fieldset nil
+                             (div #js {:className "pure-control-group"}
+                                  (label #js {:forName (.. this -props -id)} (.. this -props -name))
+                                  (input #js {:id (.. this -props -id) :type "text" :value (.. this -state -value) :onChange (.. this -handleChange)}))
+                             ))
 
-(defn create-user-table [user-details]
-  (table nil
-         (tbody nil
-                (.map user-details
-                      (fn [row]
-                        (tr nil (.map row (fn [cell](td nil cell))) ) ) )
-                ) )
+          )
+
+        :handleChange
+        (fn [event] (this-as this (.setState this #js {:value (.. event -target -value)})))
+
+        :componentWillReceiveProps
+        (fn [new-props] (this-as this (.setState this #js {:value (:initialText (js->clj new-props :keywordize-keys true))} nil) ))
+
+        }
+   )
   )
 
-(def UserDetails
+
+
+(def UserProfile
   (js/React.createClass
    #js {
         :getInitialState (fn [] (this-as this #js{:user (.. this -props -user)}))
         :render
         (fn []
-          (this-as this (let [user-details (.. this -state -user)]
-                          (create-user-table user-details)
+          (this-as this (let [user-details (js->clj (.. this -state -user))]
+                          (form #js {:className "pure-form pure-form-aligned"}
+                                (UserInputField #js {:id "identity-id" :name "Identity Id" :initialText (:identity-id user-details)})
+                                (UserInputField #js {:id "first-name" :name "First Name" :initialText (:first-name user-details)})
+                                (UserInputField #js {:id "last-name" :name "Last Name" :initialText (:last-name user-details)})
+                                (UserInputField #js {:id "email" :name "Email" :initialText (:email user-details)})
+                                )
                           )))
         })
   )
 
 
 
+; end React components
 
-(js/React.renderComponent
- (UserDetails #js {:user user-data})
- (.getElementById js/document "user-details"))
+(defn render-user-details [renderer [_ path old-value new-value] _]
+  (.setState user-profile #js {:user new-value} nil)
+)
 
-
-(deftemplate create-user-node [user-details]
-  [:form {:id "user-details-form"}
-   "Identity Id" [:input {:id "identity-id" :type "text" :name "identity-id" :value (:identity-id user-details)}]
-   "First name" [:input {:id "first-name" :type "text" :name "first-name" :value (:first-name user-details)}]
-   "Last name" [:input {:id "last-name" :type "text" :name "last-name" :value (:last-name user-details)}]
-   "Email" [:input {:id "email" :type "email" :name "email" :value (:email user-details)}]
-   ]
-  )
 
 (defn collect-user-form []
   {:identity-id (dommy/value (sel1 :#identity-id))
@@ -69,11 +82,6 @@
    }
   )
 
-
-(defn render-user-details [renderer [_ path old-value new-value] _]
-;  (dommy/clear! (sel1 :#user-details))
-;  (dommy/append! (sel1 :#user-details) (create-user-node new-value))
-)
 
 
 (defn wire-edit-profile-btn [input-queue]
@@ -94,3 +102,14 @@
   [[:value [:main :user-profile] render-user-details]
    [:transform-enable [:main :user-profile] wire-buttons]
 ])
+
+
+
+; attach user profile to DOM here.
+
+(def user-profile (UserProfile #js {:user user-data}))
+
+
+(js/React.renderComponent
+ user-profile
+ (.getElementById js/document "user-details"))

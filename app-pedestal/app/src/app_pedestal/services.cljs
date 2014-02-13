@@ -8,7 +8,7 @@
 
 
 (defn get-user [input-queue]
-  (xhr/send "http://localhost:3000/user/123456"
+  (xhr/send "http://localhost:3000/user/1"
             (fn [event]
               (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
                 (p/put-message input-queue
@@ -17,7 +17,7 @@
 
 
 (defn save-user-profile [message]
-  (.log js/console (pr-str "Save user profile: " message))
+  (.log js/console (pr-str "Saving user profile!!!!") )
   (xhr/send "http://localhost:3000/user"
             (fn [event]
               (let [response (-> event .-target)]
@@ -30,5 +30,7 @@
 
 
 (defn services-fn [message input-queue]
-  (save-user-profile message))
+  (cond
+   (= :update (msg/type message)) (save-user-profile message) )
+  )
 

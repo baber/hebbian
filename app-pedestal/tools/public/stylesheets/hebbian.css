@@ -1,0 +1,26 @@
+body {
+  background: #222;
+  color: #5CE62E;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+
+
+
+
+
+#user-profile
+{
+  border:1px solid;
+  border-radius:5px;
+
+<!--  position: absolute;
+  left: 0px;
+  width: 500px;
+-->
+}
+
+#pedestal-toolbar
+{
+  color: #FFFFFF;
+}

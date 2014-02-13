@@ -1,15 +1,15 @@
 /* begin Clojure data formatter */
 
 .keyword {
-   color: purple;
+   color: white;
 }
 
 .symbol {
-   color: blue;
+   color: white;
 }
 
 .string {
-   color: darkgreen;
+   color: white;
 }
 
 .node-section {
@@ -25,7 +25,7 @@
   pointer-events: none;
 }
 .nav > li.disabled a {
-  color: #ddd;
+  color: #FFFFFF;
 }
 .nav > li.disabled > a:hover {
   cursor: default;
@@ -52,7 +52,8 @@ div.hero-unit p.small {
   box-shadow: inset 1px 1px 1px #666;
   border-radius: 5px;
   border-image: initial;
-  font-size: 10pt;
+  font-size: 20pt;
+  color: #FFFFFF
 }
 
 #pedestal-status-panel {

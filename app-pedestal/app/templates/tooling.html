@@ -1,30 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Hebbian</title>
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <title>Hebbian</title>
 
-    <!-- Le styles -->
+      <!-- Styles -->
+
+      <link href="/stylesheets/hebbian.css" rel="stylesheet">
+      <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.1/pure-min.css">
+
+
+    <!--
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="/stylesheets/bootstrap.css" rel="stylesheet">
     <link href="/stylesheets/pedestal.css" rel="stylesheet">
     <link href="/app-pedestal.css" rel="stylesheet">
+    -->
 
+    <!-- React Library -->
     <script src="http://fb.me/react-0.8.0.js"></script>
     <script src="http://fb.me/JSXTransformer-0.8.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+
 
   </head>
 
   <body>
 
     <div class="container">
-      <div id="user-details"></div>
+
+        <div id="user-profile">
+            <div id="user-details">
+            </div>
+                <button id="edit-profile-btn">Edit Profile</button>
+                <button id="update-profile-btn">Update</button>
+        </div>
+
       <div id="event-locations"></div>
-      <div id="options"></div>
-      <button id="edit-profile-btn" class="btn btn-success">Edit Profile</button>
-      <button id="update-profile-btn" class="btn btn-success">Update</button>
+      <!-- <div id="options"></div> -->
       <footer></footer>
     </div> <!-- /container -->
 
@@ -33,7 +47,7 @@
     <script src="/javascripts/bootstrap.js" type="text/javascript"></script>
     <script src="/javascripts/pedestal/js/api.js" type="text/javascript"></script>
 
-    <script id="script-driver"></script>
+    <!-- <script id="script-driver"></script> -->
 
   </body>
 </html>
