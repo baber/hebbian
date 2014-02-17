@@ -16,14 +16,14 @@
                                )))))
 
 
-(defn save-user-profile [message]
+(defn save-user-profile [user-profile]
   (.log js/console (pr-str "Saving user profile!!!!") )
   (xhr/send "http://localhost:3000/user"
             (fn [event]
               (let [response (-> event .-target)]
                 (if (not (= 200 (.getStatus response)))
                   (.log js/console (str "Failed to post user profile!  Server response: " (.getResponseText response))))) )
-            "POST" (JSON.stringify (clj->js (:value message)))
+            "POST" (JSON.stringify (clj->js user-profile))
             (clj->js {"content-type" "application/json"})
             ) )
 

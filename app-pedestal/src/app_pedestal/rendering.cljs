@@ -1,16 +1,14 @@
 (ns app-pedestal.rendering
   (:require
-   [io.pedestal.app.render.push.templates :as templates]
-   [io.pedestal.app.render.events :as events]
    [dommy.core :as dommy]
-   [io.pedestal.app.messages :as msg]
    [app-pedestal.services :as services]
-   [io.pedestal.app.protocols :as p]
+   [cljs.core.async :as async]
    )
 
   (:use
    [React.DOM :only [form input label div fieldset]]
    )
+
 
   (:require-macros
    [dommy.macros :refer [node sel1 deftemplate]])
@@ -69,8 +67,8 @@
 
 ; end React components
 
-(defn render-user-details [renderer [_ path old-value new-value] _]
-  (.setState user-profile #js {:user new-value} nil)
+(defn render-user-details [user-profile]
+  (.setState user-profile #js {:user user-profile} nil)
 )
 
 
@@ -84,25 +82,15 @@
 
 
 
-(defn wire-edit-profile-btn [input-queue]
+(defn wire-edit-profile-btn [chan]
   (dommy/listen! (sel1 :#edit-profile-btn)
-                 :click (fn [event] (services/get-user input-queue)) ))
+                 :click (fn [event]
+                          (go (async/>! chan (services/get-user)))
+                          ) ))
 
-(defn wire-update-profile-btn [input-queue]
+(defn wire-update-profile-btn []
   (dommy/listen! (sel1 :#update-profile-btn)
-                 :click #(p/put-message input-queue
-                               {msg/type :update msg/topic [:user-profile] :value (collect-user-form)}
-                               ) ))
-
-(defn wire-buttons [renderer [_ path transform-name messages] input-queue]
-  (wire-edit-profile-btn input-queue )
-  (wire-update-profile-btn input-queue))
-
-(defn render-config []
-  [[:value [:main :user-profile] render-user-details]
-   [:transform-enable [:main :user-profile] wire-buttons]
-])
-
+                 :click #(services/save-user-profile (collect-user-form) )) )
 
 
 ; attach user profile to DOM here.
@@ -113,3 +101,17 @@
 (js/React.renderComponent
  user-profile
  (.getElementById js/document "user-details"))
+
+
+; wire up buttons and kick off event loop.
+
+(def user-channel (async/chan))
+
+(wire-edit-profile-btn user-channel)
+(wire-update-profile-btn)
+
+(go (while true (render-user-details (async/<! user-channel)))
+)
+
+
+
