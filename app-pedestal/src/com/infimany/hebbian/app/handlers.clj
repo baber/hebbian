@@ -1,4 +1,4 @@
-(ns app-pedestal.handlers
+(ns com.infimany.hebbian.app.handlers
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]) )

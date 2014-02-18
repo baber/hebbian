@@ -1,7 +1,7 @@
-(ns app-pedestal.rendering
+(ns com.infimany.hebbian.app.user-rendering
   (:require
    [dommy.core :as dommy]
-   [app-pedestal.services :as services]
+   [com.infimany.hebbian.app.services :as services]
    [cljs.core.async :as async]
    )
 
@@ -11,7 +11,9 @@
 
 
   (:require-macros
-   [dommy.macros :refer [node sel1 deftemplate]])
+   [dommy.macros :refer [node sel1 deftemplate]]
+   [cljs.core.async.macros :refer [go]])
+
 )
 
 
@@ -49,10 +51,11 @@
 (def UserProfile
   (js/React.createClass
    #js {
-        :getInitialState (fn [] (this-as this #js{:user (.. this -props -user)}))
+        :getInitialState (fn [] #js {})
         :render
         (fn []
-          (this-as this (let [user-details (js->clj (.. this -state -user))]
+          (this-as this (let [user-details (js->clj (.. this -state -user) :keywordize-keys true)]
+                          (.log js/console (pr-str "In render REACT component: " user-details) )
                           (form #js {:className "pure-form pure-form-aligned"}
                                 (UserInputField #js {:id "identity-id" :name "Identity Id" :initialText (:identity-id user-details)})
                                 (UserInputField #js {:id "first-name" :name "First Name" :initialText (:first-name user-details)})
@@ -67,8 +70,9 @@
 
 ; end React components
 
-(defn render-user-details [user-profile]
-  (.setState user-profile #js {:user user-profile} nil)
+(defn render-user-details [user-profile user-data]
+  (.log js/console (pr-str "Rendering user data: " user-data) )
+  (.setState user-profile #js {:user (clj->js user-data)} nil)
 )
 
 
@@ -85,7 +89,7 @@
 (defn wire-edit-profile-btn [chan]
   (dommy/listen! (sel1 :#edit-profile-btn)
                  :click (fn [event]
-                          (go (async/>! chan (services/get-user)))
+                           (services/get-user chan)
                           ) ))
 
 (defn wire-update-profile-btn []
@@ -95,23 +99,24 @@
 
 ; attach user profile to DOM here.
 
-(def user-profile (UserProfile #js {:user user-data}))
+(def user-profile (UserProfile))
 
 
-(js/React.renderComponent
- user-profile
- (.getElementById js/document "user-details"))
 
-
-; wire up buttons and kick off event loop.
+; wire up buttons.
 
 (def user-channel (async/chan))
 
 (wire-edit-profile-btn user-channel)
 (wire-update-profile-btn)
 
-(go (while true (render-user-details (async/<! user-channel)))
-)
+(js/React.renderComponent
+ user-profile
+ (.getElementById js/document "user-details"))
+
+
+; kick off event loop.
+(go (while true (render-user-details user-profile (async/<! user-channel))) )
 
 
 

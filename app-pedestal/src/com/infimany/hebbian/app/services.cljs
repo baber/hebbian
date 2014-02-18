@@ -1,19 +1,16 @@
-(ns app-pedestal.services
-  (:require [io.pedestal.app.protocols :as p]
-            [cljs.reader :as reader]
+(ns com.infimany.hebbian.app.services
+  (:require
             [goog.net.XhrIo :as xhr]
             [cljs.core.async :as async :refer [chan close! <! >!]]
-            [io.pedestal.app.messages :as msg])
+            )
   (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
 
-(defn get-user [input-queue]
+(defn get-user [chan]
   (xhr/send "http://localhost:3000/user/1"
             (fn [event]
               (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
-                (p/put-message input-queue
-                               {msg/type :refresh msg/topic [:user-profile] :value res}
-                               )))))
+                (.log js/console (pr-str "Getting user in service: "  chan) ) (go (>! chan res))))))
 
 
 (defn save-user-profile [user-profile]
@@ -26,11 +23,4 @@
             "POST" (JSON.stringify (clj->js user-profile))
             (clj->js {"content-type" "application/json"})
             ) )
-
-
-
-(defn services-fn [message input-queue]
-  (cond
-   (= :update (msg/type message)) (save-user-profile message) )
-  )
 
