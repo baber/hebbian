@@ -42,11 +42,14 @@ button:active {
 
 #events
 {
-  float:left;
-  left:5px;
+  position:absolute;
+  left:400px;
+  top:0px;
   border:1px solid;
   border-radius:5px;
   padding:10px;
+  width:1200px;
+  height:800px;
 
 }
 
@@ -67,7 +70,7 @@ button:active {
   border: 1px solid rgba(127,255,255,0.75);
 }
 
-.event .number {
+.event .distance {
   padding-top:5px;
   padding-right:5px;
   min-height:60px;
@@ -76,7 +79,7 @@ button:active {
   text-align: right;
 }
 
-.event .symbol {
+.event .details {
   min-height:70px;
   font-size: 12px;
   font-weight: bold;
@@ -85,7 +88,7 @@ button:active {
   text-align: center;
 }
 
-.event .details {
+.event .time {
   padding-right:5px;
   min-height:20px;
   font-size: 12px;

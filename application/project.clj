@@ -28,7 +28,7 @@
                                    :optimizations :whitespace
                                    :pretty-print true
                                    :source-map "resources/public/js/hebbianb-debug.js.map"
-                                   :foreign-libs [{:file "http://fb.me/react-0.8.0.js"
+                                   :foreign-libs [{:file "react-0.8.0.js"
                                                    :provides  ["React.DOM"]}]}
                         }]})
 
