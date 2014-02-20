@@ -16,8 +16,6 @@
 
 )
 
-
-
 ; React components
 
 (def UserInputField
