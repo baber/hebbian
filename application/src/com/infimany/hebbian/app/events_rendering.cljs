@@ -14,18 +14,18 @@
 )
 
 (def events (atom [
-              {:location [150 500] :details "Cricket Club Annual Dinner" :date "21/12/13" :time "19:30 to 21:30" :width 130 :height 160}
-              {:location [10 100], :details "OAP Party", :date "03/04/14" :time "15:00" :width 130 :height 160}
-              {:location [500 600], :details "Paper Mill Viewing", :date "13/03/14" :time "11:00" :width 130 :height 160}
-              {:location [700 350], :details "Nash Mills School Fete", :date "21/06/14" :time "11:00 to 18:00" :width 130 :height 160}
+              {:location [150 500] :details "Cricket Club Annual Dinner" :date "21/12/13" :time "19:30 to 21:30" :z-plane -100}
+              {:location [10 100], :details "OAP Party", :date "03/04/14" :time "15:00" :z-plane 0}
+              {:location [800 200], :details "Paper Mill Viewing", :date "13/03/14" :time "11:00" :z-plane 200}
+              {:location [450 350], :details "Nash Mills School Fete", :date "21/06/14" :time "11:00 to 18:00" :z-plane -500}
              ]))
 
 
 
 ; positioning functions.
 
-(def max-x 1200)
-(def max-y 800)
+(def max-x 1100)
+(def max-y 700)
 
 
 
@@ -33,13 +33,14 @@
   3 )
 
 (defn in-bounds? [location]
-  (let [x (first location) y (last location)]
-    (and
-     (> x 0)
-     (> y 0)
-     (< x max-x)
-     (< y max-y)
-     ))
+  true
+;;   (let [x (first location) y (last location)]
+;;     (and
+;;      (> x 0)
+;;      (> y 0)
+;;      (< x max-x)
+;;      (< y max-y)
+;;      ))
   )
 
 (defn to-renderable [event]
@@ -61,10 +62,14 @@
   {:width (str (:width renderable-event) "px") :height (str (:height renderable-event) "px")}
 )
 
+(defn get-z-plan-css [renderable-event]
+  {:-webkit-transform (str "translateZ(" (:z-plane renderable-event) "px)")}
+)
 
 (defn get-location-css [renderable-event]
   (clj->js (merge (get-position-css renderable-event)
                   (get-dimension-css renderable-event)
+                  (get-z-plan-css renderable-event)
                   (cond
                    (in-bounds? (:location renderable-event)) {}
                    :else {:display "none"}) ))
@@ -110,7 +115,7 @@
         (fn []
           (this-as this (div #js {:style #js {:width "1200px" :height "800px" :overflow-x "scroll"}
                                   :onWheel (.. this -handleMouseWheel)
-                                  :onDrag (.. this -handMouseDrag)
+                                  :onMouseOver  (.. this -handleMouseDrag)
 
                                   }
 
@@ -120,16 +125,16 @@
 
         :handleMouseWheel
         (fn [event]
-            (go
-             (let [delta-x (.. event -deltaX) delta-y (.. event -deltaY)]
-             (>! pan-channel {:x delta-x :y delta-y})
-             ;(cond
-              ;(not (= delta-x 0)) (>! pan-channel {:x delta-x :y delta-y}))
-              ;(not (= delta-y 0)) (>! zoom-channel {:x delta-x :y delta-y}))
-             ))
           (.preventDefault event)
+          (let [delta-x (.. event -deltaX) delta-y (.. event -deltaY)]
+            (go
+             ;(>! pan-channel {:x delta-x :y delta-y})
+             (cond
+              (> (js/Math.abs delta-x) (js/Math.abs delta-y)) (>! pan-channel {:x delta-x :y delta-y})
+              :else (>! zoom-channel {:x delta-x :y delta-y}))
+             )
+            )
           )
-
 
         :handleMouseDrag (fn [event] (.log js/console "mouse drag") )
 
@@ -153,16 +158,18 @@
 )
 
 (defn shift-locations [events delta]
-  (map #(update-in % [:location] update-location delta) events)
+  (map #(update-in % [:location] shift-location delta) events)
   )
 
 
-(defn shift-time-plane [old-time-dimension delta]
-  (+ old-time-dimension (:y delta) )
+(defn shift-z-plane [old-z-value delta]
+  (+ old-z-value (:y delta) )
 )
 
+
+
 (defn shift-time-planes [events delta]
-  (map #(update-in % [:width :height] shift-time-plane delta) events)
+  (map #(update-in % [:z-plane] shift-z-plane delta) events)
 )
 
 ; kick off event loop.
@@ -171,10 +178,10 @@
                   (.setState event-universe #js {:events (clj->js @events)})
                   ) ) )
 
-;; (go (while true (let [delta (async/<! zoom-channel)]
-;;                   (swap! events shift-time-planes delta)
-;;                   (.setState event-universe #js {:events (clj->js @events)})
-;;                  )))
+(go (while true (let [delta (async/<! zoom-channel)]
+                  (swap! events shift-time-planes delta)
+                  (.setState event-universe #js {:events (clj->js @events)})
+                 )))
 
 
 
