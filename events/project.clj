@@ -1,5 +1,5 @@
-( defproject users "0.1.0-SNAPSHOT"
-  :description "User management service for Hebbian application."
+( defproject events "0.1.0-SNAPSHOT"
+  :description "Events service for Hebbian application."
   :url "http://www.infimany.com/hebbian"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -16,7 +16,7 @@
 
 
   :plugins [[lein-ring "0.8.10"]]
-  :ring {:handler com.infimany.hebbian.user-service.rest.handlers/app}
+  :ring {:handler com.infimany.hebbian.event-service.rest.handlers/app}
 
   :profiles {:dev {:resource-paths ["test-resources"]
                    :dependencies [[javax.servlet/servlet-api "2.5"]

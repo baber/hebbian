@@ -1,0 +1,11 @@
+{
+    "type" : "object",
+    "additionalProperties" : false,
+    "properties" : {
+      "id" :  {"type":"string", "required":true, "minLength":1},
+      "location" :  {"type":"string"},
+      "details" :  {"type":"string"},
+      "start-time" :  {"type":"date-time"},
+      "end-time" :  {"type":"date-time"}
+    }
+}

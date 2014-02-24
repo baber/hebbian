@@ -1,4 +1,4 @@
-(defproject app-pedestal "0.0.1-SNAPSHOT"
+(defproject hebbian "0.0.1-SNAPSHOT"
   :description "Hebbian user application."
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2156"]
