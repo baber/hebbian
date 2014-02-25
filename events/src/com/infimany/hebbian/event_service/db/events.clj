@@ -23,6 +23,8 @@
     )
   )
 
+
+
 ; db setup related functions
 
 (monger.core/connect!)
@@ -33,22 +35,22 @@
 
 (defn validate-json [data schema]
   (schema/validate ((keyword schema) schemas) data )
+
   )
+
+
 
 ; db data access functions
 
-(defn get-events [identity-id]
-  (dissoc (monger-coll/find-one-as-map "users" {:identity-id identity-id}) :_id)
+(defn get-all-events []
+  (monger-coll/find-maps "events")
     )
 
 
 (defn insert-event [event]
   (cond
    (empty? event) (throw+ {:type :invalid_json :message "Posted JSON is empty"} )
-   (validate-json event "event-v1.json") (monger-coll/update "events" {:id (:id event)} event :upsert true)
+   (validate-json event "event-v1.json") (monger-coll/update "events" {:_id (:_id event)} event :upsert true)
    :else (throw+ {:type :invalid_json :message (str "Posted JSON is not valid" (schema/report-errors (validate-json event "event-v1.json")) )} ) )
   )
-
-(defn delete-event [id]
-  (monger-coll/remove "events" {:id id}))
 

@@ -2,10 +2,10 @@
     "type" : "object",
     "additionalProperties" : false,
     "properties" : {
-      "id" :  {"type":"string", "required":true, "minLength":1},
-      "location" :  {"type":"string"},
-      "details" :  {"type":"string"},
-      "start-time" :  {"type":"date-time"},
-      "end-time" :  {"type":"date-time"}
+      "_id" :  {"type":"string", "required":true, "minLength":1},
+      "location" :  {"type":"string", "required":true},
+      "details" :  {"type":"string", "required":true},
+      "start-time" :  {"type":"string", "required":true, "pattern":"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+|-]\\d{2}:\\d{2}"},
+      "end-time" :  {"type":"string", "required":false}
     }
 }

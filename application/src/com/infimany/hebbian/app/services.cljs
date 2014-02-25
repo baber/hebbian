@@ -6,6 +6,9 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
 
+
+
+; user services.
 (defn get-user [chan]
   (xhr/send "http://localhost:3000/user/1"
             (fn [event]
@@ -23,4 +26,13 @@
             "POST" (JSON.stringify (clj->js user-profile))
             (clj->js {"content-type" "application/json"})
             ) )
+
+
+; event services.
+
+(defn get-events [chan]
+  (xhr/send "http://localhost:3000/event"
+            (fn [event]
+              (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
+                (go (>! chan res))))))
 

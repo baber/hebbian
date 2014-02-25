@@ -2,6 +2,8 @@
   (:require
    [dommy.core :as dommy]
    [cljs.core.async :as async]
+   [com.infimany.hebbian.app.services :as services]
+
    )
 
   (:use
@@ -14,35 +16,41 @@
 
 )
 
-(def date-fmt "DD-MM-YYYY HH:mm:ss")
-
-(def raw-events [
-              {:geohash "geohash1" :details "Cricket Club Annual Dinner" :start-time (js/moment "31-12-2013 19:30:00" date-fmt) :end-time (js/moment "31-12-2013 22:30:00" date-fmt)}
-              {:geohash "geohash2" :details "OAP Party", :start-time (js/moment "17-03-2014 15:30:00" date-fmt)}
-              {:geohash "geohash3" :details "Paper Mill Viewing", :start-time (js/moment "06-11-2013 10:30:00" date-fmt)}
-              {:geohash "geohash4" :details "Nash Mills School Fete",  :start-time (js/moment "21-06-2014 11:00:00" date-fmt) :end-time (js/moment "21-06-2014 18:30:00" date-fmt)}
-             ])
-
-
+(def date-fmt "YYYY-MM-DDThh:mm:ssZ")
 (def origin (atom "geohash-origin"))
 
 ; positioning functions.
 
-(defn get-distance [{geohash :geohash}]
+(defn get-distance [{geohash :location}]
   3 )
 
-(defn get-screen-loc [{geohash :geohash}]
+(defn get-screen-loc [{geohash :location}]
   (cond
    (= "geohash1" geohash) [10 400]
    (= "geohash2" geohash) [500 100]
    (= "geohash3" geohash) [50 250]
    (= "geohash4" geohash) [395 500]
+   (= "geohash5" geohash) [900 75]
+   (= "geohash6" geohash) [25 100]
+   (= "geohash7" geohash) [189 349]
+   (= "geohash8" geohash) [567 657]
+   (= "geohash9" geohash) [15 870]
+   (= "geohash10" geohash) [700 563]
+   (= "geohash11" geohash) [453 563]
+   (= "geohash12" geohash) [635 243]
+   (= "geohash13" geohash) [242 642]
+   (= "geohash14" geohash) [464 263]
+   (= "geohash15" geohash) [632 113]
+   (= "geohash16" geohash) [563 500]
+   (= "geohash17" geohash) [632 50]
+   (= "geohash18" geohash) [156 732]
    )
+
   )
 
 (defn add-z-plane [events]
   (let [now (js/moment) hours (* 1000 60 60)]
-    (map #(assoc % :z-plane (int (/ (.diff now (:start-time %)) hours)) ) events )
+    (map #(assoc % :z-plane (int (/ (.diff now (js/moment (:start-time %) date-fmt)) hours)) ) events )
     )
   )
 
@@ -75,11 +83,9 @@
                   (get-z-plan-css renderable-event) ) )
 )
 
-; channels.
-
-(def pan-channel (async/chan (async/sliding-buffer 100)))
-(def zoom-channel (async/chan (async/sliding-buffer 100)))
-
+(defn convert-times [event]
+  (reduce #(update-in event [%] js/moment date-fmt) [:start-time :end-time])
+)
 
 ; React components.
 
@@ -139,9 +145,17 @@
 
 )
 
+; channels.
+
+(def events-channel (async/chan))
+(def pan-channel (async/chan (async/sliding-buffer 100)))
+(def zoom-channel (async/chan (async/sliding-buffer 100)))
+
+(def events (atom []))
 
 
-(def events (atom (map to-renderable (add-z-plane raw-events)) ) )
+
+;(def events (atom (map to-renderable (add-z-plane raw-events)) ) )
 
 
 (def event-universe (EventUniverse))
@@ -149,6 +163,17 @@
 (js/React.renderComponent
  event-universe
  (.getElementById js/document "events"))
+
+
+(services/get-events events-channel)
+(go (let [raw-events (async/<! events-channel)]
+      (.log js/console "Here I am!!!!")
+      (swap! events #(map to-renderable (add-z-plane (map convert-times %2))) raw-events )
+      (.setState event-universe #js {:events (clj->js @events)})
+      ))
+
+
+@events
 
 ; end React components.
 
@@ -164,7 +189,6 @@
 (defn shift-z-plane [old-z-value delta]
   (+ old-z-value (:y delta) )
 )
-
 
 
 (defn shift-time-planes [events delta]
