@@ -1,10 +1,10 @@
-(ns com.infimany.hebbian.user-service.db.users-test
+(ns com.infimany.hebbian.db.schema-validation-test
   (:require [clojure.test :refer :all]
             [clojure.core]
             [clojure.java.io :refer [resource]]
-            [com.infimany.hebbian.user-service.db.users :refer :all]
             [cheshire.core :refer :all]
             [closchema.core :as schema]
+            [com.infimany.hebbian.services.common.db :refer [validate-json]]
             ))
 
 
@@ -14,7 +14,7 @@
   )
 
 (defn rm-req-prop-error [error-map]
-  (filter #(not (and (= [:identity-id] (:path %)) (= :required (:error %))) ) error-map)
+  (filter #(not (and (= [:_id] (:path %)) (= :required (:error %))) ) error-map)
   )
 
 

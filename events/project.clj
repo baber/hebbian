@@ -12,7 +12,11 @@
                  [slingshot "0.10.3"]
                  [ring/ring-devel "1.2.1"]
                  [ring/ring-json "0.2.0"]
-                 [ring-mock "0.1.5"]]
+                 [ring-mock "0.1.5"]
+                 [com.infimany.hebbian.services/common "0.1.0-SNAPSHOT"]]
+
+  :repositories [["snapshots" "http://localhost:8081/nexus/content/repositories/snapshots"]
+                 ["releases" "http://localhost:8081/nexus/content/repositories/releases"]]
 
 
   :plugins [[lein-ring "0.8.10"]]

@@ -16,7 +16,7 @@
 ; fixtures
 
 (defn delete-test-user [f]
-  (users/delete-user (:identity-id test-user))
+  (users/delete-user (:_id test-user))
   (f)
   )
 
@@ -29,21 +29,22 @@
     ; setup
     (users/insert-user test-user)
     ; test
-    (is (= (handlers/app (request :get (str "/user/" (:identity-id test-user))) )
+    (is (= (handlers/app (request :get (str "/user/" (:_id test-user))) )
            {:status 200
-            :headers {"Content-Type" "application/json; charset=utf-8" }
+            :headers {"Access-Control-Allow-Origin" "*" "Content-Type" "application/json; charset=utf-8" }
             :body (generate-string test-user)}))
 )
 
 
 (deftest handler-POST
-  (is (empty? (users/get-user (:identity-id test-user))) )
+  (is (empty? (users/get-user (:_id test-user))) )
   (is (= (handlers/app (body (content-type (request :post "/user") "application/json") (generate-string test-user)) )
          {:status 200
-          :headers {}
+          :headers {"Access-Control-Allow-Origin" "*"}
           :body ""}))
 
-  (is (= test-user(users/get-user (:identity-id test-user))))
+  (is (= test-user(users/get-user (:_id test-user))))
 
   )
 
+(run-tests)

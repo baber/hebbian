@@ -1,4 +1,4 @@
-(ns com.infimany.hebbian.user-service.rest.exceptions
+(ns com.infimany.hebbian.services.common.exceptions
   (:use [slingshot.slingshot :only [try+]])
   (:require [ring.util.response :as ring-utils])
   )
@@ -17,6 +17,4 @@
        (catch java.lang.Throwable exception (ring-utils/status (ring-utils/response (str (:message &throw-context)) ) 500))
        )
       ))
-
-
 

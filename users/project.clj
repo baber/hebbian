@@ -1,4 +1,4 @@
-( defproject users "0.1.0-SNAPSHOT"
+(defproject users "0.1.0-SNAPSHOT"
   :description "User management service for Hebbian application."
   :url "http://www.infimany.com/hebbian"
   :license {:name "Eclipse Public License"
@@ -12,14 +12,20 @@
                  [slingshot "0.10.3"]
                  [ring/ring-devel "1.2.1"]
                  [ring/ring-json "0.2.0"]
-                 [ring-mock "0.1.5"]]
+                 [ring-mock "0.1.5"]
+                 [com.infimany.hebbian.services/common "0.1.0-SNAPSHOT"]]
+
+  :repositories [["snapshots" "http://localhost:8081/nexus/content/repositories/snapshots"]
+                 ["releases" "http://localhost:8081/nexus/content/repositories/releases"]]
 
 
   :plugins [[lein-ring "0.8.10"]]
   :ring {:handler com.infimany.hebbian.user-service.rest.handlers/app}
 
-  :profiles {:dev {:resource-paths ["test-resources"]
+  :profiles {:dev {
+                   :resource-paths ["test-resources"]
                    :dependencies [[javax.servlet/servlet-api "2.5"]
                                   [ring-mock "0.1.5"]]}}
 
-  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]})
+  :repl-options {:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]}
+  )

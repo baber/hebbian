@@ -1,0 +1,11 @@
+{
+  "type" : "object",
+  "additionalProperties" : false,
+  "properties" : {
+    "_id" :  {"type":"string", "required":true, "minLength":1},
+    "location" :  {"type":"string", "required":true},
+    "details" :  {"type":"string", "required":true},
+    "start-time" :  {"type":"string", "required":true, "pattern":"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+|-]\\d{2}:\\d{2}"},
+    "end-time" :  {"type":"string", "required":false}
+  }
+}

@@ -55,7 +55,7 @@
           (this-as this (let [user-details (js->clj (.. this -state -user) :keywordize-keys true)]
                           (.log js/console (pr-str "In render REACT component: " user-details) )
                           (form #js {:className "pure-form pure-form-aligned"}
-                                (UserInputField #js {:id "identity-id" :name "Identity Id" :initialText (:identity-id user-details)})
+                                (UserInputField #js {:id "_id" :name "Id" :initialText (:_id user-details)})
                                 (UserInputField #js {:id "first-name" :name "First Name" :initialText (:first-name user-details)})
                                 (UserInputField #js {:id "last-name" :name "Last Name" :initialText (:last-name user-details)})
                                 (UserInputField #js {:id "email" :name "Email" :initialText (:email user-details)})
@@ -75,7 +75,7 @@
 
 
 (defn collect-user-form []
-  {:identity-id (dommy/value (sel1 :#identity-id))
+  {:_id (dommy/value (sel1 :#_id))
    :first-name (dommy/value (sel1 :#first-name))
    :last-name (dommy/value (sel1 :#last-name))
    :email (dommy/value (sel1 :#email))

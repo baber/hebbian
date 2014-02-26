@@ -1,11 +1,13 @@
 (ns com.infimany.hebbian.event-service.db.events
-  (:require [clojure.core])
-  (:require [cheshire.core :refer [parse-string]])
-  (:require [monger.core])
-  (:require [monger.json])
-  (:require [monger.collection :as monger-coll])
-  (:require [closchema.core :as schema])
-  (:require [clojure.java.io :as io])
+  (:require [clojure.core]
+            [cheshire.core :refer [parse-string]]
+            [monger.core]
+            [monger.json]
+            [monger.collection :as monger-coll]
+            [closchema.core :as schema]
+            [clojure.java.io :as io]
+            [com.infimany.hebbian.services.common.db :as db-common])
+
   (:use [slingshot.slingshot :only [throw+]])
 
   (:import [com.mongodb MongoOptions ServerAddress])
@@ -14,43 +16,16 @@
            [com.mongodb DB WriteConcern]))
 
 
+(def collection-name "events")
 
-(def schemas-path "/Users/baberkhalil/software/git_repos/hebbian/events/resources/schemas")
-
-(def schemas
-  (let [schema-files  (filter #(.endsWith (.getName %) ".json")  (file-seq (io/as-file schemas-path)))]
-    (zipmap (map #(keyword (.getName %)) schema-files) (map #(parse-string (slurp %) true) schema-files))
-    )
-  )
-
-
-
-; db setup related functions
-
-(monger.core/connect!)
-
-(monger.core/set-db! (monger.core/get-db "test"))
-
-; json validation functions
-
-(defn validate-json [data schema]
-  (schema/validate ((keyword schema) schemas) data )
-
-  )
-
-
-
-; db data access functions
+(db-common/initialise-db "test")
 
 (defn get-all-events []
-  (monger-coll/find-maps "events")
-    )
+  (monger-coll/find-maps collection-name)
+  )
 
 
 (defn insert-event [event]
-  (cond
-   (empty? event) (throw+ {:type :invalid_json :message "Posted JSON is empty"} )
-   (validate-json event "event-v1.json") (monger-coll/update "events" {:_id (:_id event)} event :upsert true)
-   :else (throw+ {:type :invalid_json :message (str "Posted JSON is not valid" (schema/report-errors (validate-json event "event-v1.json")) )} ) )
+  (db-common/insert event "event-v1.json" collection-name)
   )
 

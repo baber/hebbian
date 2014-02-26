@@ -7,8 +7,9 @@
             [ring.middleware.json :as ring-json]
             [ring.util.response :as response]
             [com.infimany.hebbian.user-service.db.users :refer :all]
-            [com.infimany.hebbian.user-service.rest.exceptions :refer :all]
-            [cheshire.core :refer [parse-string]]) )
+            [cheshire.core :refer [parse-string]]
+            [com.infimany.hebbian.services.common.ring-handlers :as handlers-common]
+            [com.infimany.hebbian.services.common.exceptions :as exceptions-common]) )
 
 
 
@@ -22,17 +23,12 @@
   (route/not-found "Not Found"))
 
 
-(defn access-control [handler]
-  (fn [request]
-    (-> (handler request)
-        (response/header "Access-Control-Allow-Origin" "*")
-        )) )
 
 (def app
   (-> (handler/api user-routes)
       (ring-json/wrap-json-response)
       (ring-json/wrap-json-body {:keywords? true})
-      (wrap-exceptions)
-      (access-control)))
+      (exceptions-common/wrap-exceptions)
+      (handlers-common/cross-domain-access)))
 
 

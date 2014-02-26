@@ -1,54 +1,25 @@
 (ns com.infimany.hebbian.user-service.db.users
-  (:require [clojure.core])
-  (:require [cheshire.core :refer [parse-string]])
-  (:require [monger.core])
-  (:require [monger.json])
-  (:require [monger.collection :as monger-coll])
-  (:require [closchema.core :as schema])
-  (:require [clojure.java.io :as io])
-  (:use [slingshot.slingshot :only [throw+]])
+  (:require [clojure.core]
+            [monger.core]
+            [monger.collection :as monger-coll]
+            [com.infimany.hebbian.services.common.db :as db-common]
+            )
 
-  (:import [com.mongodb MongoOptions ServerAddress])
-  (:import [java.io File])
-  (:import [org.bson.types ObjectId]
-           [com.mongodb DB WriteConcern]))
+)
 
 
+(def collection-name "users")
 
-(def schemas-path "/Users/baberkhalil/software/git_repos/hebbian/users/resources/schemas")
+(db-common/initialise-db "test")
 
-(def schemas
-  (let [schema-files  (filter #(.endsWith (.getName %) ".json")  (file-seq (io/as-file schemas-path)))]
-    (zipmap (map #(keyword (.getName %)) schema-files) (map #(parse-string (slurp %) true) schema-files))
-    )
-  )
-
-; db setup related functions
-
-(monger.core/connect!)
-
-(monger.core/set-db! (monger.core/get-db "test"))
-
-; json validation functions
-
-(defn validate-json [data schema]
-  (schema/validate ((keyword schema) schemas) data )
-  )
-
-; db data access functions
-
-(defn get-user [identity-id]
-  (dissoc (monger-coll/find-one-as-map "users" {:identity-id identity-id}) :_id)
-    )
+(defn get-user [id]
+  (monger-coll/find-one-as-map collection-name {:_id id}) )
 
 
 (defn insert-user [user]
-  (cond
-   (empty? user) (throw+ {:type :invalid_json :message "Posted JSON is empty"} )
-   (validate-json user "user-v1.json") (monger-coll/update "users" {:identity-id (:identity-id user)} user :upsert true)
-   :else (throw+ {:type :invalid_json :message (str "Posted JSON is not valid" (schema/report-errors (validate-json user "user-v1.json")) )} ) )
+  (db-common/insert user "user-v1.json" collection-name)
   )
 
-(defn delete-user [identity-id]
-  (monger-coll/remove "users" {:identity-id identity-id}))
+(defn delete-user [id]
+  (monger-coll/remove collection-name {:_id id}))
 
