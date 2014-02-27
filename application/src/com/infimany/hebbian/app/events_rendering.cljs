@@ -18,35 +18,16 @@
 
 (def date-fmt "YYYY-MM-DDThh:mm:ssZ")
 (def origin (atom "geohash-origin"))
+(def scale 100)
 
 ; positioning functions.
 
 (defn get-distance [{geohash :location}]
   3 )
 
-(defn get-screen-loc [{geohash :location}]
-  (cond
-   (= "geohash1" geohash) [10 400]
-   (= "geohash2" geohash) [500 100]
-   (= "geohash3" geohash) [50 250]
-   (= "geohash4" geohash) [395 500]
-   (= "geohash5" geohash) [900 75]
-   (= "geohash6" geohash) [25 100]
-   (= "geohash7" geohash) [189 349]
-   (= "geohash8" geohash) [567 657]
-   (= "geohash9" geohash) [15 870]
-   (= "geohash10" geohash) [700 563]
-   (= "geohash11" geohash) [453 563]
-   (= "geohash12" geohash) [635 243]
-   (= "geohash13" geohash) [242 642]
-   (= "geohash14" geohash) [464 263]
-   (= "geohash15" geohash) [632 113]
-   (= "geohash16" geohash) [563 500]
-   (= "geohash17" geohash) [632 50]
-   (= "geohash18" geohash) [156 732]
-   )
-
-  )
+(defn get-screen-loc [{geolocation :geolocation}]
+  [(* 5000 (:lng geolocation)) 0]
+)
 
 (defn add-z-plane [events]
   (let [now (js/moment) hours (* 1000 60 60)]
