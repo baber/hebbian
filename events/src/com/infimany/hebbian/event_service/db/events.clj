@@ -6,7 +6,8 @@
             [monger.collection :as monger-coll]
             [closchema.core :as schema]
             [clojure.java.io :as io]
-            [com.infimany.hebbian.services.common.db :as db-common])
+            [com.infimany.hebbian.services.common.db :as db-common]
+            [com.infimany.hebbian.event-service.geocode-utils :as geo-utils])
 
   (:use [slingshot.slingshot :only [throw+]])
 
@@ -26,6 +27,8 @@
 
 
 (defn insert-event [event]
-  (db-common/insert event "event-v1.json" collection-name)
+  (let [geo-loc (geo-utils/get-geolocation event)]
+    (if (= nil geo-loc) (throw+ {:type :invalid_json :message (str "Geo location could not be determined from supplied address: " (:location event))} ) )
+    (db-common/insert (assoc event :geolocation geo-loc) "event-v1.json" collection-name))
   )
 

@@ -15,7 +15,7 @@
     (insert-event event)
     ))
 
-;(insert-test-events)
+(insert-test-events)
 ;(get-all-events)
 
 

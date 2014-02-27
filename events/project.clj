@@ -13,6 +13,7 @@
                  [ring/ring-devel "1.2.1"]
                  [ring/ring-json "0.2.0"]
                  [ring-mock "0.1.5"]
+                 [clj-http "0.9.0"]
                  [com.infimany.hebbian.services/common "0.1.0-SNAPSHOT"]]
 
   :repositories [["snapshots" "http://localhost:8081/nexus/content/repositories/snapshots"]

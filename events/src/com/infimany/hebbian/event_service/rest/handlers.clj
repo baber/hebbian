@@ -15,6 +15,7 @@
 
 (defroutes event-routes
   (GET "/event" [] {:body (get-all-events)})
+  (POST "/event" {event :body} (insert-event event) {:body ""})
   (route/resources "/")
   (route/not-found "Not Found"))
 
