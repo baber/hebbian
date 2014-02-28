@@ -46,26 +46,29 @@ button:active {
   left:400px;
   top:100px;
   border:1px solid;
-  border-radius:5px;
-  padding:10px;
   width:1200px;
   height:800px;
   -webkit-perspective: 1000px;
-  -webkit-perspective-origin: center 300px;
+  -webkit-perspective-origin: center 400px;
 
 }
 
 #events
 {
   position:absolute;
-  left:50px;
-  top:50px;
+  left:0px;
+  top:0px;
   border:1px solid;
   border-radius:5px;
-  padding:10px;
-  width:1100px;
-  height:700px;
+  width:1200px;
+  height:800px;
   -webkit-transform-style: preserve-3D;
+}
+
+.tunnel {
+	width: 10px;
+	height: 10px;
+  background-color: rgba(255,255,255, 1);
 }
 
 .event {
@@ -74,7 +77,6 @@ button:active {
   margin:20px;
   box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
   border: 1px solid rgba(127,255,255,0.25);
-  vertical-align:text-top;
   cursor: default;
   color: rgba(255,255,255,0.75);
   background-color: rgba(0,127,127, 0.3);
