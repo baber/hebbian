@@ -66,9 +66,9 @@ button:active {
 }
 
 .tunnel {
-	width: 10px;
-	height: 10px;
-  background-color: rgba(255,255,255, 1);
+	width: 5px;
+	height: 5px;
+  background-color: rgba(255,255,255, 0.3);
 }
 
 .event {

@@ -32,7 +32,7 @@
   3 )
 
 (defn scale-translate [point]
-  [(int (+ (:x screen-origin) (* scale (:x point)))) (+ (:y screen-origin) (* scale (:y point)))]
+  [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
 )
 
 (defn move-event-to-center [point]
@@ -54,28 +54,19 @@
 (defn to-renderable [event]
     (merge event {:distance (get-distance event)} {:screen-location (get-screen-loc event)}))
 
-(defn get-position-css [renderable-event]
-  (let [location (:screen-location renderable-event)]
-    {
-     :position "absolute"
-     :top (str (last location) "px")
-     :left (str (first location) "px")
-
-     }
-    )
-)
+(defn get-position-css [{location :screen-location z-plane :z-plane}]
+  {:position "absolute"
+   :-webkit-transform (str "translate3d(" (first location) "px," (last location) "px," z-plane "px)")
+   }
+  )
 
 (defn get-dimension-css [renderable-event]
   {:width (str (:width renderable-event) "px") :height (str (:height renderable-event) "px")}
 )
 
-(defn get-z-plan-css [renderable-event]
-  {:-webkit-transform (str "translateZ(" (:z-plane renderable-event) "px)")}
-)
 
 (defn get-location-css [renderable-event]
-  (clj->js (merge (get-position-css renderable-event)
-                  (get-z-plan-css renderable-event) ) )
+  (clj->js (get-position-css renderable-event))
 )
 
 (defn convert-times [event]
@@ -158,10 +149,6 @@
 (def origin-markers (atom (generate-origin-markers)) )
 
 
-
-;(def events (atom (map to-renderable (add-z-plane raw-events)) ) )
-
-
 (def event-universe (EventUniverse))
 
 (js/React.renderComponent
@@ -181,10 +168,10 @@
 
 (defn shift-location [old-location delta]
   [(+ (:x delta) (first old-location))  (last old-location)]
-)
+  )
 
-(defn shift-locations [events delta]
-  (map #(update-in % [:screen-location] shift-location delta) events)
+(defn shift-locations [elements delta]
+  (map #(update-in % [:screen-location] shift-location delta) elements)
   )
 
 
@@ -193,8 +180,8 @@
 )
 
 
-(defn shift-z-planes [events delta]
-  (map #(update-in % [:z-plane] shift-z-plane delta) events)
+(defn shift-z-planes [elements delta]
+  (map #(update-in % [:z-plane] shift-z-plane delta) elements)
 )
 
 ; kick off event loop.
