@@ -17,14 +17,10 @@
 
 
 (defn get-position-css [{location :screen-location z-plane :z-plane}]
-  {:position "absolute"
+  #js {:position "absolute"
    :-webkit-transform (str "translate3d(" (first location) "px," (last location) "px," z-plane "px)")
    }
   )
-
-(defn get-location-css [renderable-event]
-  (clj->js (get-position-css renderable-event))
-)
 
 
 (def events-channel (async/chan))
@@ -38,7 +34,7 @@
         :render
         (fn [] (this-as this
                               (let [marker (js->clj (.. this -props -marker) :keywordize-keys true)]
-                                (div #js {:className "tunnel" :style  (get-location-css marker)})
+                                (div #js {:className "tunnel" :style  (get-position-css marker)})
                                 )
 
                               ))
@@ -55,7 +51,7 @@
         (fn []
           (this-as this
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
-                     (div #js {:className "event" :style  (get-location-css event)}
+                     (div #js {:className "event" :style  (get-position-css event)}
                           (div #js {:className "distance"} (:distance event) )
                           (div #js {:className "details"} (:details event))
                           (let [start-time (:start-time event) end-time (:end-time event)]

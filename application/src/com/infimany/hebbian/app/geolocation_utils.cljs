@@ -9,7 +9,12 @@
   )
 (defn square [n] (* n n))
 
-(defn distance [loc1 loc2]
+
+
+(defn distance
+  "Returns distance between two lat/long locations based on Haversine formula.
+  See: http://www.movable-type.co.uk/scripts/latlong.html"
+  [loc1 loc2]
   (let [dLat (rad (- (:lat loc2) (:lat loc1))) dLng (rad (- (:lng loc2) (:lng loc1)))]
 
     (let [a  (+ (square (js/Math.sin(/ dLat 2)) )
@@ -22,5 +27,5 @@
 
 
 
-(distance  {:lat 51.746803 :lng -0.455394} {:lat 51.736275 :lng -0.465543})
+; (distance  {:lat 51.746803 :lng -0.455394} {:lat 51.736275 :lng -0.465543})
 

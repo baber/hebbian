@@ -19,22 +19,3 @@
 
 ]
 
-
-
-//  {"_id" : "52fb7629f50735a7a98fb01c", "location" : "geohash3", "details": "Paper Mill Viewing", "start-time" : "2013-11-06T10:30:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb01d", "location" : "geohash4", "details": "Primary School Fete", "start-time" : "2014-06-21T11:00:00+01:00", "end-time" : "2014-06-21T18:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb01e", "location" : "geohash5", "details": "Bingo Club Night", "start-time" : "2014-05-18T20:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb01f", "location" : "geohash6", "details": "Secondary School Reunion", "start-time" : "2014-07-14T17:30:00+01:00", "end-time" : "2014-07-14T23:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02a", "location" : "geohash7", "details": "KL Bowling Club Final", "start-time" : "2014-03-15T11:00:00+01:00", "end-time" : "2014-03-15T16:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02b", "location" : "geohash8", "details": "Local Library Book Reading", "start-time" : "2013-08-02T11:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02c", "location" : "geohash9", "details": "Football Club Fireworks Night", "start-time" : "2014-11-05T18:30:00+01:00", "end-time" : "2014-11-05T20:30:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02d", "location" : "geohash10", "details": "Traffic Light Repairs", "start-time" : "2014-02-26T00:00:00+01:00", "end-time" : "2014-02-26T05:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02e", "location" : "geohash11", "details": "Heavy Traffic", "start-time" : "2014-02-25T09:00:00+01:00", "end-time" : "2014-02-25T10:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb02f", "location" : "geohash12", "details": "Pike Lane Road Closure", "start-time" : "2014-05-14T00:00:00+01:00", "end-time" : "2014-05-17T06:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03a", "location" : "geohash13", "details": "Local Community Picnic", "start-time" : "2014-06-03T10:00:00+01:00", "end-time" : "2014-06-03T18:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03b", "location" : "geohash14", "details": "Zoo Festivities Night", "start-time" : "2014-08-10T21:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03c", "location" : "geohash15", "details": "Local Church Harvest Festival", "start-time" : "2014-10-09T15:00:00+01:00", "end-time" : "2014-10-09T16:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03d", "location" : "geohash16", "details": "Local Store Halloween Party", "start-time" : "2014-10-31T19:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03e", "location" : "geohash17", "details": "American Society Thanksgiving Night", "start-time" : "2014-11-17T20:30:00+01:00", "end-time" : "2014-11-17T23:00:00+01:00"},
-//  {"_id" : "52fb7629f50735a7a98fb03f", "location" : "geohash18", "details": "Snooker Club Annual Xmas Party", "start-time" : "2014-12-20T19:00:00+01:00", "end-time" : "2014-12-20T23:30:00+01:00"}
-

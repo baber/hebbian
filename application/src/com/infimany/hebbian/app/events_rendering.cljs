@@ -29,8 +29,9 @@
 
 ; positioning functions.
 
+
 (defn get-distance [{location :geolocation}]
-  (geoloc/distance location origin) )
+  (.toFixed (geoloc/distance location origin) 2) )
 
 (defn scale-translate [point]
   [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
@@ -55,28 +56,10 @@
 (defn to-renderable [event]
     (merge event {:distance (get-distance event)} {:screen-location (get-screen-loc event)}))
 
-(defn get-position-css [{location :screen-location z-plane :z-plane}]
-  {:position "absolute"
-   :-webkit-transform (str "translate3d(" (first location) "px," (last location) "px," z-plane "px)")
-   }
-  )
-
-(defn get-dimension-css [renderable-event]
-  {:width (str (:width renderable-event) "px") :height (str (:height renderable-event) "px")}
-)
-
-
-(defn get-location-css [renderable-event]
-  (clj->js (get-position-css renderable-event))
-)
 
 (defn convert-times [event]
   (reduce #(update-in event [%] js/moment date-fmt) [:start-time :end-time])
 )
-
-; React components.
-
-
 
 
 (defn generate-origin-markers []
@@ -94,11 +77,8 @@
       ))
 
 
-
-; end React components.
-
 (defn shift-location [old-location delta]
-  [(+ (:x delta) (first old-location))  (last old-location)]
+  [(-  (first old-location) (:x delta))  (last old-location)]
   )
 
 (defn shift-locations [elements delta]
@@ -115,12 +95,19 @@
   (map #(update-in % [:z-plane] shift-z-plane delta) elements)
 )
 
+(defn move-objects [delta f]
+  (doseq [objects [events markers]]
+    (swap! objects f delta)
+    )
+  )
+
+
 ; kick off event loop.
 (go (while true
         (let [[value channel] (async/alts! [event-ui/pan-channel event-ui/zoom-channel])]
           (cond
-           (= event-ui/pan-channel channel) (do (swap! events shift-locations value) (swap! markers shift-locations value) )
-           (= event-ui/zoom-channel channel) (do (swap! events shift-z-planes value) (swap! markers shift-z-planes value))
+           (= event-ui/pan-channel channel) (move-objects value shift-locations)
+           (= event-ui/zoom-channel channel) (move-objects value shift-z-planes)
            ) )
       (.setState event-ui/event-universe #js {:events (clj->js @events) :markers (clj->js @markers)})
       ))

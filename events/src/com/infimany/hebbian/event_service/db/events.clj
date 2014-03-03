@@ -27,8 +27,12 @@
 
 
 (defn insert-event [event]
-  (let [geo-loc (geo-utils/get-geolocation event)]
+  (let [geo-loc (geo-utils/geocode event)]
     (if (= nil geo-loc) (throw+ {:type :invalid_json :message (str "Geo location could not be determined from supplied address: " (:location event))} ) )
     (db-common/insert (assoc event :geolocation geo-loc) "event-v1.json" collection-name))
   )
+
+
+(defn delete-events []
+  (monger-coll/remove collection-name ))
 

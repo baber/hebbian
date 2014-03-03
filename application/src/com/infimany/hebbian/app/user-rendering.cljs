@@ -108,9 +108,9 @@
 (wire-edit-profile-btn user-channel)
 (wire-update-profile-btn)
 
-(js/React.renderComponent
- user-profile
- (.getElementById js/document "user-details"))
+;; (js/React.renderComponent
+;;  user-profile
+;;  (.getElementById js/document "user-details"))
 
 
 ; kick off event loop.
