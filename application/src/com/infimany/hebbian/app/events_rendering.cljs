@@ -4,7 +4,7 @@
    [cljs.core.async :as async]
    [com.infimany.hebbian.app.services :as services]
    [com.infimany.hebbian.app.ui-components.events :as event-ui]
-
+   [com.infimany.hebbian.app.geolocation-utils :as geoloc]
    )
 
   (:use
@@ -29,8 +29,8 @@
 
 ; positioning functions.
 
-(defn get-distance [{geohash :location}]
-  3 )
+(defn get-distance [{location :geolocation}]
+  (geoloc/distance location origin) )
 
 (defn scale-translate [point]
   [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
@@ -122,7 +122,6 @@
            (= event-ui/pan-channel channel) (do (swap! events shift-locations value) (swap! markers shift-locations value) )
            (= event-ui/zoom-channel channel) (do (swap! events shift-z-planes value) (swap! markers shift-z-planes value))
            ) )
-      (.log js/console "setting state!!")
       (.setState event-ui/event-universe #js {:events (clj->js @events) :markers (clj->js @markers)})
       ))
 
