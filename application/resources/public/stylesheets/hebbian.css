@@ -5,7 +5,7 @@ body {
   background-color: #000000;
   color: rgba(127,255,255,0.75);
   margin: 0;
-  font-family: Helvetica, sans-serif;;
+  font-family: Helvetica, sans-serif;
   overflow: hidden;
 }
 
@@ -40,11 +40,25 @@ button:active {
   padding:10px;
 }
 
+#controls {
+  position: fixed;
+  top: 40px;
+  left: 40px;
+  border: 1px solid rgba(255,255,255,1.0);
+  cursor: default;
+  color: rgba(255,255,255,1.0);
+  background-color: rgba(0,0,0, 0.0);
+  z-index:1;
+}
+
+
+
 #environment
 {
   position:absolute;
-  left:400px;
-  top:100px;
+  left:0px;
+  top:0px;
+  z-index:0;
   width:1200px;
   height:800px;
   -webkit-perspective: 1000px;
@@ -61,6 +75,24 @@ button:active {
   width:1200px;
   height:800px;
   -webkit-transform-style: preserve-3D;
+}
+
+
+.label {
+  color: rgba(255,255,255,1.0);
+  margin:10px;
+  float:left;
+  width:120px;
+}
+
+.input {
+  color: rgba(255,255,255,1.0);
+  background-color: rgba(0,0,0, 0.0);
+  border: 1px solid rgba(255,255,255,1.0);
+  margin:10px;
+  float:left;
+  width:80px;
+
 }
 
 .tunnel {
