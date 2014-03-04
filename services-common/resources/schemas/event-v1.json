@@ -14,8 +14,16 @@
                   },
     "geolocation" : {"type":"object", "required":false, "additionalProperties":false,
                      "properties" : {
-                       "lat":"number",
-                       "lng":"number"
+                       "type" : {
+                         "type" : "string",
+                         "enum" : ["Point"]
+                       },
+                       "coordinates" : {"type": "array",
+                                        "items": {
+                                          "type": "number"
+                                        },
+                                        "minItems": 2,
+                                        "maxItems":2}
                      }},
     "details" :  {"type":"string", "required":true},
     "start-time" :  {"type":"string", "required":true, "pattern":"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+|-]\\d{2}:\\d{2}"},

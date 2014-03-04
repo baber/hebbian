@@ -21,7 +21,8 @@
 
 (db-common/initialise-db "test")
 
-(defn get-all-events []
+(defn get-events [postcode distance]
+  (println postcode distance)
   (monger-coll/find-maps collection-name)
   )
 

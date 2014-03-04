@@ -30,8 +30,9 @@
 
 ; event services.
 
-(defn get-events [chan]
-  (xhr/send (str "http://localhost:" event-port "/event")
+(defn get-events [chan criteria]
+  (.log js/console "Getting events: " criteria)
+  (xhr/send (str "http://localhost:" event-port "/event?postcode=" (:postcode criteria) "&distance=" (:distance criteria))
             (fn [event]
               (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
                 (go (>! chan res))))))

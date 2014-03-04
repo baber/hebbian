@@ -14,7 +14,7 @@
 
 
 (defroutes event-routes
-  (GET "/event" [] {:body (get-all-events)})
+  (GET "/event" {{postcode :postcode distance :distance} :params} {:body (get-events postcode distance)})
   (POST "/event" {event :body} (insert-event event) {:body ""})
   (route/resources "/")
   (route/not-found "Not Found"))

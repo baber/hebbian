@@ -3,7 +3,7 @@
             [closchema.core :as schema]
             [clojure.java.io :as io]
             [clojure.java.io :refer [resource]]
-            [com.infimany.hebbian.event-service.db.events :refer [insert-event get-all-events delete-events]]
+            [com.infimany.hebbian.event-service.db.events :refer [insert-event get-events delete-events]]
             [com.infimany.hebbian.services.common.db :as db-common]
             [clj-time.core :refer [now days]]
             [clj-time.periodic :refer [periodic-seq]]
@@ -48,7 +48,7 @@
    :_id (str (ObjectId.))
    :details details
    :start-time (time-fmt/unparse time-formatter start-time)
-   :geolocation geolocation
+   :geolocation {:type "Point" :coordinates [(:lng geolocation) (:lat geolocation)]}
    :location {:postalCode "TEST" :country "TEST"}
    }
   )

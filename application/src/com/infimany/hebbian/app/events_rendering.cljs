@@ -1,9 +1,11 @@
 (ns com.infimany.hebbian.app.events-rendering
   (:require
    [dommy.core :as dommy]
+   [dommy.attrs :as dommy-attr]
    [cljs.core.async :as async]
    [com.infimany.hebbian.app.services :as services]
    [com.infimany.hebbian.app.ui-components.events :as event-ui]
+   [com.infimany.hebbian.app.ui-components.controls :as controls-ui]
    [com.infimany.hebbian.app.geolocation-utils :as geoloc]
    )
 
@@ -13,15 +15,19 @@
    )
 
   (:require-macros
-   [cljs.core.async.macros :refer [go]])
+   [cljs.core.async.macros :refer [go]]
+   [dommy.macros :refer [sel1]])
+
+
 
 )
+
 
 (def date-fmt "YYYY-MM-DDThh:mm:ssZ")
 (def origin {:lat 51.734262 :lng -0.455852})
 (def scale 10000)
-(def width 1200)
-(def height 800)
+(def width (.-offsetWidth (sel1 :#events)))
+(def height (.-offsetHeight (sel1 :#events)))
 (def screen-origin {:x (/ width 2) :y (/ height 2)})
 (def event-x-translation 65)
 (def event-y-translation 80)
@@ -30,8 +36,8 @@
 ; positioning functions.
 
 
-(defn get-distance [{location :geolocation}]
-  (.toFixed (geoloc/distance location origin) 2) )
+(defn get-distance [{{coords :coordinates} :geolocation}]
+  (.toFixed (geoloc/distance {:lng (first coords) :lat (last coords)} origin) 2) )
 
 (defn scale-translate [point]
   [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
@@ -41,8 +47,8 @@
   [(- (first point) event-x-translation) (- (last point) event-y-translation )]
 )
 
-(defn get-screen-loc [{geolocation :geolocation}]
-  (move-event-to-center (scale-translate {:x (- (:lng geolocation) (:lng origin)) :y (- (:lat origin) (:lat geolocation))}))
+(defn get-screen-loc [{{coords :coordinates} :geolocation}]
+  (move-event-to-center (scale-translate {:x (- (first coords) (:lng origin)) :y (- (last coords) (:lat origin))}))
 )
 
 (defn add-z-plane [events]
@@ -62,20 +68,12 @@
 )
 
 
-(defn generate-origin-markers []
+(defn generate-origin-markers [old-markers]
   (for [z-plane (range 0 -2000 -200)] {:z-plane z-plane :screen-location [(:x screen-origin) (:y screen-origin)]})
 )
 
 (def events (atom []))
 (def markers (atom (generate-origin-markers)) )
-
-
-(services/get-events event-ui/events-channel)
-(go (let [raw-events (async/<! event-ui/events-channel)]
-      (swap! events #(map to-renderable (add-z-plane (map convert-times %2))) raw-events )
-      (.setState event-ui/event-universe #js {:events (clj->js @events) :markers (clj->js @markers)})
-      ))
-
 
 (defn shift-location [old-location delta]
   [(-  (first old-location) (:x delta))  (last old-location)]
@@ -102,12 +100,18 @@
   )
 
 
+(defn reload [new-events]
+  (swap! events #(map to-renderable (add-z-plane (map convert-times %2))) new-events )
+  (swap! markers generate-origin-markers)
+)
+
 ; kick off event loop.
 (go (while true
-        (let [[value channel] (async/alts! [event-ui/pan-channel event-ui/zoom-channel])]
+        (let [[value channel] (async/alts! [event-ui/pan-channel event-ui/zoom-channel controls-ui/events-channel])]
           (cond
            (= event-ui/pan-channel channel) (move-objects value shift-locations)
            (= event-ui/zoom-channel channel) (move-objects value shift-z-planes)
+           (= controls-ui/events-channel channel) (reload value)
            ) )
       (.setState event-ui/event-universe #js {:events (clj->js @events) :markers (clj->js @markers)})
       ))

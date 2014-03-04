@@ -23,7 +23,6 @@
   )
 
 
-(def events-channel (async/chan))
 (def pan-channel (async/chan (async/sliding-buffer 100)))
 (def zoom-channel (async/chan (async/sliding-buffer 100)))
 
@@ -72,7 +71,7 @@
 
         :render
         (fn []
-          (this-as this (div #js {:style #js {:width (str width "px") :height (str height "px")}
+          (this-as this (div #js {:style #js {:width "100%" :height "100%"}
                                   :onWheel (.. this -handleMouseWheel)
                                   }
                              (into-array (map #(OriginMarker #js {:marker %}) (.. this -state -markers)) )
