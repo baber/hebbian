@@ -49,6 +49,8 @@
 (defn collect-search-criteria []
   {:postcode (dommy/value (sel1 :#postcode))
    :distance (dommy/value (sel1 :#distance))
+   :start-time (dommy/value (sel1 :#start-time))
+   :end-time (dommy/value (sel1 :#end-time))
    }
   )
 
@@ -80,6 +82,8 @@
           (this-as this (div #js {}
                              (InputField #js {:id "postcode" :name "Postcode:"})
                              (InputField #js {:id "distance" :name "Distance (km):"})
+                             (InputField #js {:id "start-time" :name "Start Time:"})
+                             (InputField #js {:id "end-time" :name "End Time:"})
                              (UpdateButton #js {})
                              ))
           )

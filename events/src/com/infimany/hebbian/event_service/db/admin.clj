@@ -11,8 +11,8 @@
   (monger.core/connect!)
   (monger.core/set-db! (monger.core/get-db db-name))
   (monger-coll/ensure-index "events" (array-map :geolocation "2dsphere") )
+  (monger-coll/ensure-index "events" (array-map :start-time 1) )
   (monger.core/disconnect!)
   )
 
 
-;(create-indices)
