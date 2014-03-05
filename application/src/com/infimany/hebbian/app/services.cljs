@@ -31,9 +31,17 @@
 ; event services.
 
 (defn get-events [chan criteria]
-  (.log js/console "Getting events: " criteria)
-  (xhr/send (str "http://localhost:" event-port "/event?postcode=" (:postcode criteria) "&distance=" (:distance criteria))
+  (let [geolocation (:geolocation criteria)]
+    (xhr/send (str "http://localhost:" event-port "/event?lng=" (:lng geolocation) "&lat=" (:lat geolocation) "&distance=" (:distance criteria))
+              (fn [event]
+                (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
+                  (go (>! chan res)))))))
+
+(JSON.stringify (clj->js {:lng -0.5 :lat 51.2}))
+
+(defn add-geolocation [chan criteria]
+  (xhr/send (str "http://localhost:" event-port "/event/geocode?postcode=" (:postcode criteria))
             (fn [event]
               (let [res (js->clj (-> event .-target .getResponseJson) :keywordize-keys true)]
-                (go (>! chan res))))))
+                (go (>! chan (assoc criteria :geolocation res)))))) )
 

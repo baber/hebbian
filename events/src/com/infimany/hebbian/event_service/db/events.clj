@@ -3,6 +3,7 @@
             [cheshire.core :refer [parse-string]]
             [monger.core]
             [monger.json]
+            [monger.operators :refer :all]
             [monger.collection :as monger-coll]
             [closchema.core :as schema]
             [clojure.java.io :as io]
@@ -18,12 +19,17 @@
 
 
 (def collection-name "events")
+(def earth-radius 6371)
 
 (db-common/initialise-db "test")
 
-(defn get-events [postcode distance]
-  (println postcode distance)
-  (monger-coll/find-maps collection-name)
+(defn get-events [geolocation distance]
+  (monger-coll/find-maps collection-name
+                         {:geolocation {"$geoWithin"
+                                        { "$centerSphere"
+                                          [ [ (:lng geolocation) , (:lat geolocation) ] (/ distance earth-radius) ]
+                                          } } }
+                         )
   )
 
 

@@ -11,11 +11,17 @@
 
   (:require-macros
    [dommy.macros :refer [sel1]]
+   [cljs.core.async.macros :refer [go]]
    )
   )
 
 ; channels
 (def events-channel (async/chan))
+(def criteria-channel (async/chan))
+
+;state
+(def origin (atom nil))
+
 
 
 (def InputField
@@ -46,6 +52,7 @@
    }
   )
 
+
 (def UpdateButton
   (js/React.createClass
    #js {
@@ -57,8 +64,8 @@
 
         :handleClick
         (fn [event]
-          (.log js/console "HandleClick called!")
-          (services/get-events events-channel (collect-search-criteria))
+          (let [criteria (collect-search-criteria)]
+            (services/add-geolocation criteria-channel criteria))
           )
 
         }
@@ -85,8 +92,10 @@
  (ControlPanel)
  (.getElementById js/document "controls"))
 
-
-
-
-
-
+; kick off event loop
+(go (while true
+      (let [criteria (async/<! criteria-channel)]
+        (swap! origin #(:geolocation %2) criteria)
+        (services/get-events events-channel criteria)
+        )
+      ))

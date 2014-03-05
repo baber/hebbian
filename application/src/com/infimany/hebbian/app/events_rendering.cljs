@@ -18,13 +18,10 @@
    [cljs.core.async.macros :refer [go]]
    [dommy.macros :refer [sel1]])
 
-
-
 )
 
 
 (def date-fmt "YYYY-MM-DDThh:mm:ssZ")
-(def origin {:lat 51.734262 :lng -0.455852})
 (def scale 10000)
 (def width (.-offsetWidth (sel1 :#events)))
 (def height (.-offsetHeight (sel1 :#events)))
@@ -32,12 +29,17 @@
 (def event-x-translation 65)
 (def event-y-translation 80)
 
+; state
+(def events (atom []))
+(def markers (atom []) )
+
+markers
 
 ; positioning functions.
 
 
 (defn get-distance [{{coords :coordinates} :geolocation}]
-  (.toFixed (geoloc/distance {:lng (first coords) :lat (last coords)} origin) 2) )
+  (.toFixed (geoloc/distance {:lng (first coords) :lat (last coords)} @controls-ui/origin) 2) )
 
 (defn scale-translate [point]
   [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
@@ -48,7 +50,7 @@
 )
 
 (defn get-screen-loc [{{coords :coordinates} :geolocation}]
-  (move-event-to-center (scale-translate {:x (- (first coords) (:lng origin)) :y (- (last coords) (:lat origin))}))
+  (move-event-to-center (scale-translate {:x (- (first coords) (:lng @controls-ui/origin)) :y (- (:lat @controls-ui/origin) (last coords))}))
 )
 
 (defn add-z-plane [events]
@@ -68,12 +70,13 @@
 )
 
 
-(defn generate-origin-markers [old-markers]
-  (for [z-plane (range 0 -2000 -200)] {:z-plane z-plane :screen-location [(:x screen-origin) (:y screen-origin)]})
+(defn generate-origin-markers [_]
+  (let [z-planes (map #(:z-plane %) @events) min-z (apply min z-planes) max-z (apply max z-planes)]
+    (for [z-plane (range max-z min-z -200)] {:z-plane z-plane :screen-location [(:x screen-origin) (:y screen-origin)]})
+    )
 )
 
-(def events (atom []))
-(def markers (atom (generate-origin-markers)) )
+
 
 (defn shift-location [old-location delta]
   [(-  (first old-location) (:x delta))  (last old-location)]
