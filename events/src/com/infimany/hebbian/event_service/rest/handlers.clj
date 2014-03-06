@@ -19,7 +19,7 @@
             ) )
 
 
-(def time-formatter (time-fmt/formatter "YYYY-MM-dd"))
+(def time-formatter (time-fmt/formatter "YYYY-MM-dd'T'HH:mm:ssZZ"))
 
 (defn extract-params [query-params]
   (merge

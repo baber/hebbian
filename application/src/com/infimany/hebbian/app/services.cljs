@@ -34,7 +34,7 @@
 (defn event-query-url [criteria]
   (let [geolocation (:geolocation criteria)]
     (str "http://localhost:" event-port "/event?lng=" (:lng geolocation) "&lat=" (:lat geolocation) "&distance=" (:distance criteria)
-         "&start-time=" (:start-time criteria) "&end-time=" (:end-time criteria)) )
+         "&start-time=" (js/encodeURIComponent (:start-time criteria)) "&end-time=" (js/encodeURIComponent (:end-time criteria))))
 )
 
 

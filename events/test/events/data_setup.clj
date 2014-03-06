@@ -19,7 +19,6 @@
   )
 
 (def origin {:lat 51.734262 :lng -0.455852})
-(def time-formatter (time-fmt/formatter "YYYY-MM-dd'T'HH:mm:ssZZ"))
 (def max-lng-shift 0.2)
 (def max-lat-shift 0.1)
 
