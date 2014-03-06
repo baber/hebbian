@@ -11,12 +11,12 @@
             )
 
   (:use [clojure.string :only [split trim
-]])
+                               ]])
 
   (:import [org.bson.types ObjectId])
 
 
-)
+  )
 
 (def origin {:lat 51.734262 :lng -0.455852})
 (def time-formatter (time-fmt/formatter "YYYY-MM-dd'T'HH:mm:ssZZ"))
@@ -47,7 +47,7 @@
   {
    :_id (str (ObjectId.))
    :details details
-   :start-time (time-fmt/unparse time-formatter start-time)
+   :start-time start-time
    :geolocation {:type "Point" :coordinates [(:lng geolocation) (:lat geolocation)]}
    :location {:postalCode "TEST" :country "TEST"}
    }
@@ -61,7 +61,7 @@
 (defn insert-test-events []
   (delete-events)
   (doseq [event (generate-events)]
-    (db-common/insert event "event-v1.json" "events")
+    (db-common/insert event  "events")
     ))
 
 

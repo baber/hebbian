@@ -10,7 +10,7 @@
             [ring.middleware.stacktrace :as ring-stacktrace]
             [ring.middleware.json :as ring-json]
             [ring.util.response :as response]
-            [com.infimany.hebbian.event-service.db.events :refer :all]
+            [com.infimany.hebbian.event-service.db.events :refer [get-events insert-event]]
             [com.infimany.hebbian.event-service.geocode-utils :refer [geocode]]
             [com.infimany.hebbian.services.common.exceptions :as exceptions-common]
             [com.infimany.hebbian.services.common.ring-handlers :as handlers-common]

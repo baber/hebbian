@@ -4,7 +4,7 @@
             [clojure.java.io :refer [resource]]
             [cheshire.core :refer :all]
             [closchema.core :as schema]
-            [com.infimany.hebbian.services.common.db :refer [validate-json]]
+            [com.infimany.hebbian.services.common.validation :refer [validate-json]]
             ))
 
 
@@ -25,7 +25,7 @@
 
 (deftest test-validate-json
   (testing "json validation for valid user json"
-    (is (= true
+    (is (empty?
            (validate-json (parse-string (slurp (resource "./valid_user.json")) true) "user-v1.json")
            )
         ))
@@ -33,11 +33,10 @@
   (testing "json validation for invalid user json"
     (is (= ()
            (remove-expected-errors
-            (schema/report-errors
-             (validate-json (parse-string (slurp (resource "./invalid_user.json")) true) "user-v1.json")))
+             (validate-json (parse-string (slurp (resource "./invalid_user.json")) true) "user-v1.json"))
            )
         ))
   )
 
 
-
+(run-tests)
