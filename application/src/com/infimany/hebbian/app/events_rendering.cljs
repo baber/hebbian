@@ -79,7 +79,7 @@ markers
 
 
 (defn shift-location [old-location delta]
-  [(-  (first old-location) (:x delta))  (last old-location)]
+  [(-  (first old-location) (:x delta))  (+ (last old-location) (:y delta))]
   )
 
 (defn shift-locations [elements delta]
@@ -112,7 +112,7 @@ markers
 (go (while true
         (let [[value channel] (async/alts! [event-ui/pan-channel event-ui/zoom-channel controls-ui/events-channel])]
           (cond
-           (= event-ui/pan-channel channel) (move-objects value shift-locations)
+           (= event-ui/pan-channel channel) (do (.log js/console (str "panning: " (:x value) "/" (:y value)) )(move-objects value shift-locations))
            (= event-ui/zoom-channel channel) (move-objects value shift-z-planes)
            (= controls-ui/events-channel channel) (reload value)
            ) )
