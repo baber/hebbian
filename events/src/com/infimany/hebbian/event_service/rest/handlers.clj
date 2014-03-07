@@ -11,6 +11,7 @@
             [ring.middleware.json :as ring-json]
             [ring.util.response :as response]
             [com.infimany.hebbian.event-service.db.events :refer [get-events insert-event]]
+            [com.infimany.hebbian.event-service.notifications.new-events :refer [get-new-events]]
             [com.infimany.hebbian.event-service.geocode-utils :refer [geocode]]
             [com.infimany.hebbian.services.common.exceptions :as exceptions-common]
             [com.infimany.hebbian.services.common.ring-handlers :as handlers-common]
@@ -31,6 +32,7 @@
 (defroutes event-routes
   (GET "/event" {query-params :params} {:body (get-events  (extract-params query-params))})
   (GET "/event/geocode" {{postcode :postcode} :params} {:body (geocode {:location {:postalCode postcode :country "UK"}})})
+  (GET "/event/updates" [] {:body (get-new-events)})
   (POST "/event" {event :body} (insert-event event) {:body ""})
   (route/resources "/")
   (route/not-found "Not Found"))

@@ -15,6 +15,7 @@
                  [ring-mock "0.1.5"]
                  [clj-http "0.9.0"]
                  [clj-time "0.6.0"]
+                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
                  [com.infimany.hebbian.services/common "0.1.0-SNAPSHOT"]]
 
   :repositories [["snapshots" "http://localhost:8081/nexus/content/repositories/snapshots"]

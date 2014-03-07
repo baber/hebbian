@@ -33,7 +33,7 @@
 (def events (atom []))
 (def markers (atom []) )
 
-markers
+
 
 ; positioning functions.
 
@@ -120,6 +120,11 @@ markers
       ))
 
 
+; real time event notifications
 
+(def event-source (js/EventSource "http://localhost:3000/event/updates"))
+(defn event-handler [event] (.log js/console "got new event!!!"))
+
+(set! (.-onmessage event-source) event-handler)
 
 
