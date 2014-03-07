@@ -15,6 +15,7 @@
    )
   )
 
+
 ; channels
 (def events-channel (async/chan))
 (def criteria-channel (async/chan))

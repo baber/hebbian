@@ -12,8 +12,6 @@
 
   )
 
-(def width 1200)
-(def height 800)
 
 
 (defn get-position-css [{location :screen-location z-plane :z-plane}]
@@ -23,10 +21,45 @@
   )
 
 
-(def pan-channel (async/chan))
+; channels
+(def pan-channel (async/chan (async/sliding-buffer 100)))
 (def zoom-channel (async/chan (async/sliding-buffer 100)))
 
+; utility functions
 
+(defn fibo []
+  (map first (iterate (fn [[a b]] [b (+ a b)]) [10 11]) )
+)
+
+(defn generate-pan-sequence [n]
+  (let [pan-sequence (take n (fibo))]
+    (flatten (map #(repeat 2 %) (concat pan-sequence (reverse pan-sequence))))
+    )
+  )
+
+(def keycode-functions
+  {
+   :37  (fn [n] {:x n :y 0})
+   :38  (fn [n] {:x 0 :y (* -1 n)})
+   :39  (fn [n] {:x (* -1 n) :y 0})
+   :40  (fn [n] {:x 0 :y n})
+   })
+
+
+
+(defn get-pan-deltas [keycode steps]
+    (map ((keyword (str keycode)) keycode-functions) (generate-pan-sequence steps))
+  )
+
+
+(defn dispatch-deltas [deltas]
+  (go (async/>! pan-channel (first deltas)))
+  (if (> (count deltas) 1)
+    (js/setTimeout dispatch-deltas 30 (rest deltas)))
+  )
+
+
+; react components
 (def OriginMarker
   (js/React.createClass
    #js {
@@ -64,27 +97,6 @@
    )
   )
 
-(defn fibo []
-  (map first (iterate (fn [[a b]] [b (+ a b)]) [0 1]) )
-)
-
-
-(defn generate-pan-sequence [n]
-  (take n (fibo))
-)
-
-
-
-(defn get-pan-deltas [keycode steps]
-  (cond
-   (= 38 keycode) (map (fn [n] {:x 0 :y (* -1 n)}) (generate-pan-sequence steps))
-   (= 40 keycode) (map (fn [n] {:x 0 :y n}) (generate-pan-sequence steps))
-   (= 37 keycode) (map (fn [n] {:x n :y 0}) (generate-pan-sequence steps))
-   (= 39 keycode) (map (fn [n] {:x (* -1 n) :y 0}) (generate-pan-sequence steps))
-   :else nil
-   )
-  )
-
 
 
 (def EventUniverse
@@ -98,7 +110,7 @@
           (this-as this (div #js {:style #js {:width "100%" :height "100%"}
                                   :tabIndex "1"
                                   :onWheel (.. this -handleMouseWheel)
-                                  :onKeyDown (.. this -handleKeyPress)
+                                  :onKeyDown (.. this -handleKeyDown)
                                   }
                              (into-array (map #(OriginMarker #js {:marker %}) (.. this -state -markers)) )
                              (into-array (map #(Event #js {:event %}) (.. this -state -events)) )
@@ -108,7 +120,6 @@
         :handleMouseWheel
         (fn [event]
           (.preventDefault event)
-          (.log js/console (.. event -deltaX))
           (let [delta-x (.. event -deltaX) delta-y (.. event -deltaY)]
             (go
              (cond
@@ -119,13 +130,14 @@
           )
 
 
-        :handleKeyPress
+        :handleKeyDown
         (fn [event]
+          (.preventDefault event)
           (let [keyCode (.-keyCode event)]
-             (let [pan-deltas (get-pan-deltas keyCode 12)]
-               (if pan-deltas
-                 (dorun (for [delta pan-deltas] (go (.log js/console (str "in callback " delta)) (async/>! pan-channel delta)) ))
-                 )
+             (let [deltas (get-pan-deltas keyCode 5)]
+               (if deltas
+                 (dispatch-deltas deltas)
+                  )
                ))
           )
         }
