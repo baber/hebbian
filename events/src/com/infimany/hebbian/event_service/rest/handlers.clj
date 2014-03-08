@@ -32,7 +32,7 @@
 (defroutes event-routes
   (GET "/event" {query-params :params} {:body (get-events  (extract-params query-params))})
   (GET "/event/geocode" {{postcode :postcode} :params} {:body (geocode {:location {:postalCode postcode :country "UK"}})})
-  (GET "/event/updates" [] {:body (get-new-events)})
+  (GET "/event/updates" [] {:headers {"content-type" "text/event-stream;charset=UTF-8"} :body (get-new-events)})
   (POST "/event" {event :body} (insert-event event) {:body ""})
   (route/resources "/")
   (route/not-found "Not Found"))

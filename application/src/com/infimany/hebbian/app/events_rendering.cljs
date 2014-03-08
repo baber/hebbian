@@ -122,9 +122,14 @@
 
 ; real time event notifications
 
-(def event-source (js/EventSource "http://localhost:3000/event/updates"))
-(defn event-handler [event] (.log js/console "got new event!!!"))
+(def event-source (js/EventSource. "http://localhost:3000/event/updates"))
+(defn event-handler [event] (.log js/console (.-data event)) nil)
 
-(set! (.-onmessage event-source) event-handler)
+;; (.addEventListener event-source
+;;                          "message"
+;;                          (fn [e] (event-handler e))
+;;                          false)
+
+(aset event-source "onmessage" event-handler)
 
 

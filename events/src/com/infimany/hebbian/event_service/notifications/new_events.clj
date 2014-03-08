@@ -23,8 +23,7 @@
 
 (defn get-new-events []
   (<!! (timeout interval))
-  (println "Generating new event!")
-  (generate-string base-event)
+  (str "data: " (generate-string (assoc base-event :start-time (.toDate (now)))) "\n\n")
   )
 
 
