@@ -12,20 +12,26 @@
 
   )
 
+; state
+(def x-translation (atom 0))
+(def y-translation (atom 0))
+(def z-translation (atom 0))
 
-
-(defn get-position-css [{location :screen-location z-plane :z-plane}]
+(defn get-position-css [{location :screen-location z-plane :z-plane} offsets]
   #js {:position "absolute"
-   :-webkit-transform (str "translate3d(" (first location) "px," (last location) "px," z-plane "px)")
-   }
+       :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px," (+ (:y offsets) (last location)) "px," (+ (:z offsets) z-plane) "px)")
+       :-webkit-animation "eventRotation 5s linear 2s infinite normal;"
+       }
   )
 
 
-; channels
-(def pan-channel (async/chan (async/sliding-buffer 100)))
-(def zoom-channel (async/chan (async/sliding-buffer 100)))
 
 ; utility functions
+
+(def css-classes {
+                  :normal "event"
+                  :new "new-event"
+                  })
 
 (defn fibo []
   (map first (iterate (fn [[a b]] [b (+ a b)]) [10 11]) )
@@ -53,7 +59,12 @@
 
 
 (defn dispatch-deltas [deltas]
-  (go (async/>! pan-channel (first deltas)))
+  (let [delta (first deltas) x (:x delta)]
+    (if (> (js/Math.abs x) 0) (swap! x-translation - x)
+      (swap! y-translation + (:y delta))
+      )
+    (update-ui)
+    )
   (if (> (count deltas) 1)
     (js/setTimeout dispatch-deltas 30 (rest deltas)))
   )
@@ -65,8 +76,8 @@
    #js {
         :render
         (fn [] (this-as this
-                              (let [marker (js->clj (.. this -props -marker) :keywordize-keys true)]
-                                (div #js {:className "tunnel" :style  (get-position-css marker)})
+                              (let [marker (js->clj (.. this -props -marker) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
+                                (div #js {:className "tunnel" :style  (get-position-css marker offsets)})
                                 )
 
                               ))
@@ -83,8 +94,8 @@
         :render
         (fn []
           (this-as this
-                   (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
-                     (div #js {:className "event" :style  (get-position-css event)}
+                   (let [event (js->clj (.. this -props -event) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
+                     (div #js {:className ((keyword (:status event)) css-classes) :style  (get-position-css event offsets)}
                           (div #js {:className "distance"} (:distance event) )
                           (div #js {:className "details"} (:details event))
                           (let [start-time (:start-time event) end-time (:end-time event)]
@@ -96,7 +107,6 @@
         }
    )
   )
-
 
 
 (def EventUniverse
@@ -112,10 +122,11 @@
                                   :onWheel (.. this -handleMouseWheel)
                                   :onKeyDown (.. this -handleKeyDown)
                                   }
-                             (into-array (map #(OriginMarker #js {:marker %}) (.. this -state -markers)) )
-                             (into-array (map #(Event #js {:event %}) (.. this -state -events)) )
-                             ))
-          )
+                             (let [offsets {:x @x-translation :y @y-translation :z @z-translation}]
+                               (into-array (map #(OriginMarker #js {:marker % :offsets offsets}) (.. this -state -markers)) )
+                               (into-array (map #(Event #js {:event % :offsets offsets}) (.. this -state -events)) )
+                               ))
+          ) )
 
         :handleMouseWheel
         (fn [event]
@@ -123,8 +134,9 @@
           (let [delta-x (.. event -deltaX) delta-y (.. event -deltaY)]
             (go
              (cond
-              (>= (js/Math.abs delta-y) (js/Math.abs delta-x)) (async/>! zoom-channel {:x delta-x :y delta-y})
-              :else (async/>! pan-channel {:x delta-x :y 0}))
+              (>= (js/Math.abs delta-y) (js/Math.abs delta-x)) (do (swap! z-translation + delta-y)  (update-ui) )
+              :else  (do (swap! x-translation - delta-x)  (update-ui) )
+              )
              )
             )
           )
@@ -151,4 +163,6 @@
 (js/React.renderComponent
  event-universe
  (.getElementById js/document "events"))
+
+(defn update-ui [] (.forceUpdate event-universe))
 

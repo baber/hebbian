@@ -7,6 +7,7 @@
    [com.infimany.hebbian.app.ui-components.events :as event-ui]
    [com.infimany.hebbian.app.ui-components.controls :as controls-ui]
    [com.infimany.hebbian.app.geolocation-utils :as geoloc]
+
    )
 
   (:use
@@ -62,7 +63,9 @@
 
 
 (defn to-renderable [event]
-    (merge event {:distance (get-distance event)} {:screen-location (get-screen-loc event)}))
+  (merge event {:status :normal}
+         {:distance (get-distance event)}
+         {:screen-location (get-screen-loc event)}))
 
 
 (defn convert-times [event]
@@ -108,28 +111,32 @@
   (swap! markers generate-origin-markers)
 )
 
+(defn update-ui-state []
+  (.setState event-ui/event-universe #js {:events (clj->js @events)  :markers (clj->js @markers)})
+)
+
 ; kick off event loop.
 (go (while true
-        (let [[value channel] (async/alts! [event-ui/pan-channel event-ui/zoom-channel controls-ui/events-channel])]
+        (let [[value channel] (async/alts! [controls-ui/events-channel])]
           (cond
-           (= event-ui/pan-channel channel) (move-objects value shift-locations)
-           (= event-ui/zoom-channel channel) (move-objects value shift-z-planes)
            (= controls-ui/events-channel channel) (reload value)
            ) )
-      (.setState event-ui/event-universe #js {:events (clj->js @events) :markers (clj->js @markers)})
+      (update-ui-state)
       ))
 
 
-; real time event notifications
+; new event notifications
 
 (def event-source (js/EventSource. "http://localhost:3000/event/updates"))
-(defn event-handler [event] (.log js/console (.-data event)) nil)
 
-;; (.addEventListener event-source
-;;                          "message"
-;;                          (fn [e] (event-handler e))
-;;                          false)
 
-(aset event-source "onmessage" event-handler)
+(defn new-event-handler [event]
+  (let [event  (.-data event)]
+    (swap! events (partial cons (assoc (to-renderable (first (add-z-plane [(convert-times (js->clj (JSON/parse event) :keywordize-keys true))]))) :status :new) ))
+    (update-ui-state)
+    )
+  )
 
+
+(aset event-source "onmessage" new-event-handler)
 
