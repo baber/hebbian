@@ -19,14 +19,15 @@
 (def rotation (atom 0))
 (def visited-events (atom #{}))
 
-(def angles (cycle (range 360)))
 
+
+; css functions.
 
 (defn get-animation-transforms [event]
   (if (and (= (:status event) "new") (not (contains? @visited-events (:_id event)))) (str "rotateY(" @rotation "deg)") "")
 )
 
-(defn get-position-css [{location :screen-location z-plane :z-plane :as event} offsets]
+(defn get-translation-css [{location :screen-location z-plane :z-plane :as event} offsets]
   #js {:position "absolute"
        :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px,"
                                (+ (:y offsets) (last location)) "px,"
@@ -37,7 +38,7 @@
 
 
 
-; utility functions
+; non-css animation functions
 
 
 (defn fibo []
@@ -84,7 +85,7 @@
         :render
         (fn [] (this-as this
                               (let [marker (js->clj (.. this -props -marker) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                                (div #js {:className "tunnel" :style  (get-position-css marker offsets)})
+                                (div #js {:className "tunnel" :style  (get-translation-css marker offsets)})
                                 )
 
                               ))
@@ -98,13 +99,11 @@
   (js/React.createClass
    #js {
 
-;        :getInitialState (fn [] (clj->js {:visited false}))
-
         :render
         (fn []
           (this-as this
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                     (div #js {:className "event" :style  (get-position-css event offsets) :onMouseEnter  (.. this -handleMouseOver) }
+                     (div #js {:className "event" :style  (get-translation-css event offsets) :onMouseEnter  (.. this -handleMouseEnter) }
                           (div #js {:className "distance"} (:distance event) )
                           (div #js {:className "details"} (:details event))
                           (let [start-time (:start-time event) end-time (:end-time event)]
@@ -113,7 +112,7 @@
 
           )
 
-        :handleMouseOver
+        :handleMouseEnter
         (fn [_] (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
                                 (if (not (contains? @visited-events (:_id event))) (swap! visited-events conj (:_id event)) )  )))
 
@@ -136,8 +135,8 @@
                                   :onKeyDown (.. this -handleKeyDown)
                                   }
                              (let [offsets {:x @x-translation :y @y-translation :z @z-translation}]
-                               (into-array (map #(OriginMarker #js {:marker % :offsets offsets}) (.. this -state -markers)) )
-                               (into-array (map #(Event #js {:event % :offsets offsets}) (.. this -state -events)) )
+                               (into-array (concat (map #(OriginMarker #js {:marker % :offsets offsets}) (.. this -state -markers))
+                                                   (map #(Event #js {:event % :offsets offsets}) (.. this -state -events) ) ))
                                ))
           ) )
 
@@ -170,6 +169,7 @@
 
 )
 
+
 (def event-universe (EventUniverse))
 
 
@@ -185,7 +185,7 @@
  event-universe
  (.getElementById js/document "events"))
 
-
-(rotate-events angles)
+; kick off rotation animation for pushed events.
+(rotate-events (cycle (range 0 360 1)))
 
 

@@ -35,7 +35,6 @@
 (def markers (atom []) )
 
 
-
 ; positioning functions.
 
 
@@ -104,7 +103,6 @@
     (swap! objects f delta)
     )
   )
-
 
 (defn reload [new-events]
   (swap! events #(map to-renderable (add-z-plane (map convert-times %2))) new-events )
