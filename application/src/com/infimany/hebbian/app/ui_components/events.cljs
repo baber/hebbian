@@ -17,27 +17,28 @@
 (def y-translation (atom 0))
 (def z-translation (atom 0))
 (def rotation (atom 0))
+(def visited-events (atom #{}))
 
 (def angles (cycle (range 360)))
 
 
-(defn get-position-css [{location :screen-location z-plane :z-plane} offsets]
+(defn get-animation-transforms [event]
+  (if (and (= (:status event) "new") (not (contains? @visited-events (:_id event)))) (str "rotateY(" @rotation "deg)") "")
+)
+
+(defn get-position-css [{location :screen-location z-plane :z-plane :as event} offsets]
   #js {:position "absolute"
-;       :-webkit-animation "eventRotation 5s linear 2s infinite normal"
        :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px,"
                                (+ (:y offsets) (last location)) "px,"
-                               (+ (:z offsets) z-plane) "px) rotateY(" @rotation "deg)")
+                               (+ (:z offsets) z-plane) "px) " (get-animation-transforms event))
        }
   )
 
 
 
+
 ; utility functions
 
-(def css-classes {
-                  :normal "event"
-                  :new "new-event"
-                  })
 
 (defn fibo []
   (map first (iterate (fn [[a b]] [b (+ a b)]) [10 11]) )
@@ -97,11 +98,13 @@
   (js/React.createClass
    #js {
 
+;        :getInitialState (fn [] (clj->js {:visited false}))
+
         :render
         (fn []
           (this-as this
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                     (div #js {:className ((keyword (:status event)) css-classes) :style  (get-position-css event offsets)}
+                     (div #js {:className "event" :style  (get-position-css event offsets) :onMouseEnter  (.. this -handleMouseOver) }
                           (div #js {:className "distance"} (:distance event) )
                           (div #js {:className "details"} (:details event))
                           (let [start-time (:start-time event) end-time (:end-time event)]
@@ -109,6 +112,10 @@
                           )))
 
           )
+
+        :handleMouseOver
+        (fn [_] (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
+                                (if (not (contains? @visited-events (:_id event))) (swap! visited-events conj (:_id event)) )  )))
 
         }
    )
@@ -163,20 +170,22 @@
 
 )
 
-
 (def event-universe (EventUniverse))
+
+
+(defn update-ui [] (.forceUpdate event-universe))
+
+(defn rotate-events [angles]
+  (swap! rotation #(first angles))
+  (update-ui)
+  (js/setTimeout rotate-events 10 (rest angles))
+)
 
 (js/React.renderComponent
  event-universe
  (.getElementById js/document "events"))
 
 
+(rotate-events angles)
 
-(defn update-ui [] (.forceUpdate event-universe))
 
-(defn update-rotations []
-  (swap! rotation #(next angles))
-  (update-ui)
-)
-
-;(js/setInterval update-rotations 10)

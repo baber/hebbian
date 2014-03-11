@@ -11,8 +11,7 @@
             [clojure.core.async :as async :refer [<!! timeout]]
             )
 
-  (:use [clojure.string :only [split trim
-                               ]])
+  (:use [clojure.string :only [split trim]])
 
   (:import [org.bson.types ObjectId])
 )
