@@ -16,11 +16,17 @@
 (def x-translation (atom 0))
 (def y-translation (atom 0))
 (def z-translation (atom 0))
+(def rotation (atom 0))
+
+(def angles (cycle (range 360)))
+
 
 (defn get-position-css [{location :screen-location z-plane :z-plane} offsets]
   #js {:position "absolute"
-       :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px," (+ (:y offsets) (last location)) "px," (+ (:z offsets) z-plane) "px)")
-       :-webkit-animation "eventRotation 5s linear 2s infinite normal;"
+;       :-webkit-animation "eventRotation 5s linear 2s infinite normal"
+       :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px,"
+                               (+ (:y offsets) (last location)) "px,"
+                               (+ (:z offsets) z-plane) "px) rotateY(" @rotation "deg)")
        }
   )
 
@@ -164,5 +170,13 @@
  event-universe
  (.getElementById js/document "events"))
 
+
+
 (defn update-ui [] (.forceUpdate event-universe))
 
+(defn update-rotations []
+  (swap! rotation #(next angles))
+  (update-ui)
+)
+
+;(js/setInterval update-rotations 10)
