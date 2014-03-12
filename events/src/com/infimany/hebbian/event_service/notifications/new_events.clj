@@ -19,7 +19,7 @@
 (def origin {:lat 51.737199 :lng -0.455852})
 (def max-lng-shift 0.2)
 (def max-lat-shift 0.1)
-(def interval 20000)
+(def interval 60000)
 
 
 (defn round [scale number]

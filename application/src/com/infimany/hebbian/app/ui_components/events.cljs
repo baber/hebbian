@@ -23,15 +23,22 @@
 
 ; css functions.
 
-(defn get-animation-transforms [event]
-  (if (and (= (:status event) "new") (not (contains? @visited-events (:_id event)))) (str "rotateY(" @rotation "deg)") "")
+(defn get-rotation-angle [{status :status id :_id} face]
+  (let [offset (if (= face :front) 0 180)]
+    (if (and (= status "new") (not (contains? @visited-events id))) (+ @rotation offset) offset)
+    )
+  )
+
+(defn get-rotation-transform [event face]
+  (str "rotateY(" (get-rotation-angle event face) "deg)")
 )
 
-(defn get-translation-css [{location :screen-location z-plane :z-plane :as event} offsets]
+(defn get-translation-css [{location :screen-location z-plane :z-plane :as event} face offsets]
   #js {:position "absolute"
        :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px,"
                                (+ (:y offsets) (last location)) "px,"
-                               (+ (:z offsets) z-plane) "px) " (get-animation-transforms event))
+                               (+ (:z offsets) z-plane) "px) " (get-rotation-transform event face))
+       :-webkit-backface-visibility "hidden"
        }
   )
 
@@ -85,7 +92,7 @@
         :render
         (fn [] (this-as this
                               (let [marker (js->clj (.. this -props -marker) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                                (div #js {:className "tunnel" :style  (get-translation-css marker offsets)})
+                                (div #js {:className "tunnel" :style  (get-translation-css marker :front offsets)})
                                 )
 
                               ))
@@ -103,12 +110,17 @@
         (fn []
           (this-as this
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                     (div #js {:className "event" :style  (get-translation-css event offsets) :onMouseEnter  (.. this -handleMouseEnter) }
-                          (div #js {:className "distance"} (:distance event) )
-                          (div #js {:className "details"} (:details event))
-                          (let [start-time (:start-time event) end-time (:end-time event)]
-                            (div #js {:className "time"} (.format (:start-time event) "DD MMM YYYY")))
-                          )))
+                     (div #js {:style {}}
+                      (div #js {:className "event" :style  (get-translation-css event :front offsets) :onMouseEnter  (.. this -handleMouseEnter) }
+                           (div #js {:className "distance"} (:distance event) )
+                           (div #js {:className "details"} (:details event))
+                           (let [start-time (:start-time event) end-time (:end-time event)]
+                             (div #js {:className "time"} (.format (:start-time event) "DD MMM YYYY")))
+                           )
+
+                      (div #js {:className "event" :style (get-translation-css event :back offsets)} "Lorum Ipsum!" ))
+
+                     ))
 
           )
 
