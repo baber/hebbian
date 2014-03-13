@@ -18,16 +18,14 @@
 (def z-translation (atom 0))
 (def rotation (atom 0))
 (def visited-events (atom #{}))
+(def event-rotations (atom {}))
 
+
+; channels
+(def rotations-channel (async/chan (async/sliding-buffer 1000)))
 
 
 ; css functions.
-
-(defn get-rotation-angle [{status :status id :_id} face]
-  (let [offset (if (= face :front) 0 180)]
-    (if (and (= status "new") (not (contains? @visited-events id))) (+ @rotation offset) offset)
-    )
-  )
 
 
 (defn get-translation-css [{location :screen-location z-plane :z-plane :as event} rotation-angle offsets]
@@ -98,6 +96,25 @@
   )
 
 
+;; (defn rotate-event [id direction angles]
+;;   (let [animation ((keyword id) @event-animations)]
+;;     (if (and (= direction (:direction animation)) (> (count angles) 0))
+;;       (do (swap! event-animations #(assoc %1 (keyword id) {:direction direction :angle %2}) (first angles) )
+;;         (update-ui)
+;;         (js/setTimeout rotate-event 10 (rest angles))
+;;         )
+;;       )
+;;     )
+;;   )
+
+(defn get-rotation-angle [{status :status id :_id}]
+  (cond
+   (and (= status "new") (not (contains? @visited-events id))) @rotation
+   :else ((keyword id) @event-rotations 0)
+   )
+  )
+
+
 
 (def Event
   (js/React.createClass
@@ -108,29 +125,62 @@
           (this-as this
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true)
                          offsets (js->clj (.. this -props -offsets) :keywordize-keys true)
-                         rotation-angle (if (and (= (:status event) "new") (not (contains? @visited-events (:_id event)))) @rotation 0)]
+                         rotation-angle (get-rotation-angle event)]
                      (div #js {:style {}}
                           (div #js {:className "event" :style  (get-translation-css event rotation-angle offsets)
-                                    :onMouseEnter  (.. this -handleMouseEnter)
-                                    :onMouseExit (.. this -handleMouseExit) }
+                                    :onClick  (.. this -showBack)
+                                    ;                                    :onMouseLeave (.. this -handleMouseLeave)
+                                    }
                                (div #js {:className "distance"} (:distance event) )
                                (div #js {:className "details"} (:details event))
                                (let [start-time (:start-time event) end-time (:end-time event)]
                                  (div #js {:className "time"} (.format (:start-time event) "DD MMM YYYY")))
                                )
 
-                      (div #js {:className "event" :style (get-translation-css event (+ 180 rotation-angle) offsets)} "Lorum Ipsum!" ))
+                          (div #js {:className "event" :style (get-translation-css event (+ 180 rotation-angle) offsets) :onClick  (.. this -showFront)} "Lorum Ipsum!" ))
 
                      ))
 
           )
 
-        :handleMouseExit
-        (fn [_] (.log js/console "Mouse Exit!"))
+        :showBack
+        (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
+                                 (dorun (for [angle (range 0 180 1)]
+                                          (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
+
+
+        :showFront
+        (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
+                                 (dorun (for [angle (range 180 360 1)]
+                                          (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
+        ;;        (fn [_]
+        ;;           (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)
+        ;;                               id (:_id event)
+        ;;                               animation ((keyword id) @event-animations)
+        ;;                               current-angle (:angle animation 180)]
+        ;;                           (swap! event-animations #(assoc %1 (keyword id) {:direction :clockwise :angle current-angle}) )
+        ;;                           (rotate-event id :clockwise (range current-angle 0 -1))
+        ;;                           ))
+        ;;           )
 
         :handleMouseEnter
-        (fn [_] (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
-                                (if (not (contains? @visited-events (:_id event))) (swap! visited-events conj (:_id event)) )  )))
+        (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
+                                 (dorun (for [angle (range 0 180 1)]
+                                          (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
+
+        ;;         (fn [_]
+        ;;           (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)
+        ;;                               id (:_id event)
+        ;;                               animation ((keyword id) @event-animations)
+        ;;                               current-angle (:angle animation 0)]
+        ;;                           (swap! event-animations #(assoc %1 (keyword id) {:direction :anticlockwise :angle current-angle}) )
+        ;;                           (rotate-event id :anticlockwise (range current-angle 0 -1))
+        ;;                           ))
+        ;;           )
+
+
+        ;;         (fn [_] (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
+        ;;                                 (if (not (contains? @visited-events (:_id event))) (swap! visited-events conj (:_id event)) )  )))
 
         }
    )
@@ -202,6 +252,16 @@
  (.getElementById js/document "events"))
 
 ; kick off rotation animation for pushed events.
-(rotate-events (cycle (range 0 360 1)))
+;(rotate-events (cycle (range 0 360 1)))
 
+; kick off event loop for processing event card rotations.
+(def interval 10)
+
+
+(go (while true
+      (async/<! (async/timeout interval))
+      (let [rotation (async/<! rotations-channel)]
+        (swap! event-rotations #(assoc %1 (keyword (:id rotation)) (:angle rotation)))
+        (update-ui)
+        )))
 
