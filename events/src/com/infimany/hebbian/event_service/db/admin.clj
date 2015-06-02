@@ -4,7 +4,7 @@
             [monger.collection :as monger-coll]))
 
 
-(def db-name "test")
+(def db-name "hebbian")
 
 
 (defn create-indices []

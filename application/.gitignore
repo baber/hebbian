@@ -2,3 +2,7 @@ out/
 target/
 logs/
 .lein-repl-history
+.idea
+*.iml
+.nrepl-port
+.lein-failures

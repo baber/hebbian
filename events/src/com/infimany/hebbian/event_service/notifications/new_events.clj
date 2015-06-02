@@ -4,7 +4,6 @@
             [clojure.java.io :as io]
             [clojure.java.io :refer [resource]]
             [com.infimany.hebbian.event-service.db.events :refer [insert-event get-events delete-events]]
-            [com.infimany.hebbian.services.common.db :as db-common]
             [clj-time.core :refer [now days]]
             [clj-time.periodic :refer [periodic-seq]]
             [clj-time.format :as time-fmt]
@@ -16,10 +15,10 @@
   (:import [org.bson.types ObjectId])
 )
 
-(def origin {:lat 51.737199 :lng -0.455852})
+(def origin {:lat 54.702355, :lng -3.276575})
 (def max-lng-shift 0.2)
 (def max-lat-shift 0.1)
-(def interval 300000)
+(def interval 20000)
 
 
 (defn round [scale number]
@@ -27,6 +26,7 @@
   (double (.setScale (bigdec number) scale java.math.RoundingMode/HALF_EVEN)))
 
 (def summaries (flatten (repeat 3 (map #(trim %) (split (slurp (resource "./events.txt")) #",")))))
+
 
 (defn calculate-delta [limit]
   (let [delta (rand limit)]
@@ -48,13 +48,15 @@
    :details details
    :start-time start-time
    :geolocation {:type "Point" :coordinates [(:lng geolocation) (:lat geolocation)]}
-   :location {:postalCode "TEST" :country "TEST"}
+   :location {:postalCode "test" :country "UK"}
    }
   )
 
 
 (def events
   (map create-event summaries (periodic-seq (now) (days 3)) (iterate move-location origin) ) )
+
+
 
 (defn get-new-event []
   (<!! (timeout interval))

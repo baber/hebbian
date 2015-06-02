@@ -1,40 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Hebbian</title>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Hebbian</title>
 
-        <!-- Styles -->
+    <!-- Styles -->
 
-        <link href="/stylesheets/hebbian.css" rel="stylesheet">
-        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.1/pure-min.css">
+    <link href="/stylesheets/hebbian.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.1/pure-min.css">
 
-    </head>
+</head>
 
-    <body>
-        <div id="content">
+<body>
+<div id="content">
 
-<!--            <div id="user-profile">
-                <div id="user-details"></div>
-                <button id="edit-profile-btn">Edit Profile</button>
-                <button id="update-profile-btn">Update</button>
-            </div>
--->
+    <!--            <div id="user-profile">
+                    <div id="user-details"></div>
+                    <button id="edit-profile-btn">Edit Profile</button>
+                    <button id="update-profile-btn">Update</button>
+                </div>
+    -->
 
-            <div id="controls" class="controlpanel">
-            </div>
+    <div id="controls" class="controlpanel">
+    </div>
 
-            <div id="environment">
-                <div id="events"></div>
-            </div>
+    <div id="environment">
+        <div id="events"></div>
+    </div>
 
+    <script type="text/javascript" src="./js/goog/base.js"></script>
+    <script type="text/javascript" src="./js/hebbian-debug.js"></script>
+    <script type="text/javascript">goog.require("com.infimany.hebbian.app.ui_components.controls")</script>
+    <script type="text/javascript">goog.require("com.infimany.hebbian.app.ui_components.events")</script>
+    <script type="text/javascript">goog.require("com.infimany.hebbian.app.events_rendering")</script>
 
-            <!-- Compiled ClojureScript -->
-            <script src="./js/hebbian-debug.js" type="text/javascript"></script>
+</div>
 
-
-        </div>
-
-    </body>
+</body>
 </html>

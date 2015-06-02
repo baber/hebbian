@@ -1,25 +1,37 @@
 (ns com.infimany.hebbian.user-service.db.users
   (:require [clojure.core]
-            [monger.core]
+            [monger.core :as monger]
             [monger.collection :as monger-coll]
-            [com.infimany.hebbian.services.common.db :as db-common]
             )
+
+  (:use [slingshot.slingshot :only [throw+]])
 
 )
 
 
 (def collection-name "users")
-
-(db-common/initialise-db "test")
+(def db-name "hebbian")
 
 (defn get-user [id]
-  (monger-coll/find-one-as-map collection-name {:_id id}) )
+  (let [conn (monger/connect)
+        db (monger/get-db conn db-name)]
+    (monger-coll/find-one-as-map db collection-name {:_id id})))
 
+(defn insert [data]
+  (let [conn (monger/connect)
+        db (monger/get-db conn db-name)]
+    (cond
+      (empty? data) (throw+ {:type :invalid_json :message "JSON data is empty"})
+      :else (monger-coll/update db collection-name {:_id (:_id data)} data {:upsert true}))))
 
 (defn insert-user [user]
-  (db-common/insert user "user-v1.json" collection-name)
+  (insert user)
   )
 
 (defn delete-user [id]
-  (monger-coll/remove collection-name {:_id id}))
+  (let [conn (monger/connect) db (monger/get-db conn db-name)]
+    (monger-coll/remove db collection-name {:_id id}))
+  )
+
+;(insert-user {:name "bob"})
 

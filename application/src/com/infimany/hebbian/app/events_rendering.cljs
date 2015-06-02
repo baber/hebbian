@@ -7,17 +7,18 @@
    [com.infimany.hebbian.app.ui-components.events :as event-ui]
    [com.infimany.hebbian.app.ui-components.controls :as controls-ui]
    [com.infimany.hebbian.app.geolocation-utils :as geoloc]
-
+   [cljsjs.moment :as moment]
    )
 
-  (:use
-   [React.DOM :only [div]]
-   [moment :only [moment]]
-   )
+  ;(:use
+  ; [React.DOM :only [div]]
+  ; [moment :only [moment]]
+  ; )
 
   (:require-macros
-   [cljs.core.async.macros :refer [go]]
-   [dommy.macros :refer [sel1]])
+    [cljs.core.async.macros :refer [go]]
+    [dommy.core :refer [sel1]]
+    )
 
 )
 
@@ -125,7 +126,7 @@
 
 ; new event notifications
 
-(def event-source (js/EventSource. "http://localhost:3000/event/updates"))
+(def event-source (js/EventSource. "http://localhost:3002/event/updates"))
 
 
 (defn new-event-handler [event]

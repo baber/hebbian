@@ -4,17 +4,20 @@
    [clojure.java.io :as io]
    [clj-http.client :as clj-http]
    )
-
   )
 
-(def mapquest-key "Fmjtd|luur210znh,2w=o5-90ys0u")
+; (def mapquest-key "Fmjtd|luur210znh,2w=o5-90ys0u")
 
-(def geocode-url "http://www.mapquestapi.com/geocoding/v1/address")
-(def reverse-geocode-url "http://www.mapquestapi.com/geocoding/v1/reverse")
+(def mapquest-key "Fmjtd|luu821u7n1,ba=o5-942w9z")
+
+
+(def geocode-url "http://open.mapquestapi.com/geocoding/v1/address")
+(def reverse-geocode-url "http://open.mapquestapi.com/geocoding/v1/reverse")
 
 (def request-params {:query-params {:key mapquest-key} :content-type :json})
 
-(def request-body {:location {:postalCode "hp38aw" :city "hemel hempstead" :county "hertfordshire" :state "" :country "GB"}})
+ (def request-body {:location {:postalCode "hp38aw" :city "hemel hempstead" :county "hertfordshire" :state "" :country "GB"}})
+
 
 
 (defn geocode [{location :location}]

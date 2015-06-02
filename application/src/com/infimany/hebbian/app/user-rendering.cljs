@@ -3,15 +3,16 @@
    [dommy.core :as dommy]
    [com.infimany.hebbian.app.services :as services]
    [cljs.core.async :as async]
+   [cljsjs.react :as react]
    )
 
-  (:use
-   [React.DOM :only [form input label div fieldset]]
-   )
+  ;(:use
+  ; [React.DOM :only [form input label div fieldset]]
+  ; )
 
 
   (:require-macros
-   [dommy.macros :refer [node sel1 deftemplate]]
+    ;[dommy.macros :refer [node sel1 deftemplate]]
    [cljs.core.async.macros :refer [go]])
 
 )

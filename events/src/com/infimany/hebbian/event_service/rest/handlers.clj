@@ -28,7 +28,6 @@
    (into {} (for [k [:start-time :end-time] :when (not (blank? (k query-params)))] [k (time-fmt/parse time-formatter (k query-params))]))
   ) )
 
-
 (defroutes event-routes
   (GET "/event" {query-params :params} {:body (get-events  (extract-params query-params))})
   (GET "/event/geocode" {{postcode :postcode} :params} {:body (geocode {:location {:postalCode postcode :country "UK"}})})

@@ -1,18 +1,19 @@
 (ns com.infimany.hebbian.app.ui-components.events
   (:require
    [cljs.core.async :as async]
+   [cljsjs.react :as react]
    )
 
-  (:use
-   [React.DOM :only [div]]
-   )
+  ;(:use
+  ; [cljsjs.react :only [div]]
+  ; )
 
   (:require-macros
    [cljs.core.async.macros :refer [go]])
 
   )
 
-; state
+; ui interaction state
 (def x-translation (atom 0))
 (def y-translation (atom 0))
 (def z-translation (atom 0))
@@ -26,8 +27,6 @@
 
 
 ; css functions.
-
-
 (defn get-translation-css [{location :screen-location z-plane :z-plane :as event} rotation-angle offsets]
   #js {:position "absolute"
        :-webkit-transform (str "translate3d(" (+ (:x offsets) (first location)) "px,"
@@ -40,7 +39,23 @@
 
 
 
-; non-css animation functions
+; animation functions
+
+(defn update-ui [] (.forceUpdate event-universe))
+
+(defn rotate-events [angles]
+  (swap! rotation #(first angles))
+  (update-ui)
+  (js/setTimeout rotate-events 10 (rest angles))
+)
+
+
+(defn get-rotation-angle [{status :status id :_id}]
+  (cond
+   (and (= status "new") (not (contains? @visited-events id))) @rotation
+   :else ((keyword id) @event-rotations 0)
+   )
+  )
 
 
 (defn fibo []
@@ -87,7 +102,7 @@
         :render
         (fn [] (this-as this
                               (let [marker (js->clj (.. this -props -marker) :keywordize-keys true) offsets (js->clj (.. this -props -offsets) :keywordize-keys true)]
-                                (div #js {:className "tunnel" :style  (get-translation-css marker 0 offsets)})
+                                (js/React.DOM.div #js {:className "tunnel" :style  (get-translation-css marker 0 offsets)})
                                 )
 
                               ))
@@ -95,25 +110,7 @@
    )
   )
 
-
-;; (defn rotate-event [id direction angles]
-;;   (let [animation ((keyword id) @event-animations)]
-;;     (if (and (= direction (:direction animation)) (> (count angles) 0))
-;;       (do (swap! event-animations #(assoc %1 (keyword id) {:direction direction :angle %2}) (first angles) )
-;;         (update-ui)
-;;         (js/setTimeout rotate-event 10 (rest angles))
-;;         )
-;;       )
-;;     )
-;;   )
-
-(defn get-rotation-angle [{status :status id :_id}]
-  (cond
-   (and (= status "new") (not (contains? @visited-events id))) @rotation
-   :else ((keyword id) @event-rotations 0)
-   )
-  )
-
+(def OriginMarkerFactory (js/React.createFactory OriginMarker))
 
 
 (def Event
@@ -126,65 +123,41 @@
                    (let [event (js->clj (.. this -props -event) :keywordize-keys true)
                          offsets (js->clj (.. this -props -offsets) :keywordize-keys true)
                          rotation-angle (get-rotation-angle event)]
-                     (div #js {:style {}}
-                          (div #js {:className "event" :style  (get-translation-css event rotation-angle offsets)
-                                    :onClick  (.. this -showBack)
-                                    ;                                    :onMouseLeave (.. this -handleMouseLeave)
+                     (js/React.DOM.div #js {:style {}}
+                          (js/React.DOM.div #js {:className "event" :style  (get-translation-css event rotation-angle offsets)
+                                    :onClick  (partial (.. this -doRotate) 0 185 5)
+                                    :onMouseEnter (.. this -handleMouseEnter)
                                     }
-                               (div #js {:className "distance"} (:distance event) )
-                               (div #js {:className "details"} (:details event))
+                               (js/React.DOM.div #js {:className "distance"} (str (:distance event) "km") )
+                               (js/React.DOM.div #js {:className "details"} (:details event))
                                (let [start-time (:start-time event) end-time (:end-time event)]
-                                 (div #js {:className "time"} (.format (:start-time event) "DD MMM YYYY")))
+                                 (js/React.DOM.div #js {:className "time"} (.format (:start-time event) "DD MMM YYYY")))
                                )
 
-                          (div #js {:className "event" :style (get-translation-css event (+ 180 rotation-angle) offsets) :onClick  (.. this -showFront)} "Lorum Ipsum!" ))
+                          (js/React.DOM.div #js {:className "event" :style (get-translation-css event (+ 180 rotation-angle) offsets)
+                                    :onClick  (partial (.. this -doRotate) 180 365 5)
+                                    :onMouseEnter (.. this -handleMouseEnter)} "Lorum Ipsum!" ))
 
                      ))
 
           )
 
-        :showBack
-        (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
-                                 (dorun (for [angle (range 0 180 1)]
+        :doRotate
+        (fn [start stop step _]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
+                                 (dorun (for [angle (range start stop step)]
                                           (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
 
-
-        :showFront
-        (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
-                                 (dorun (for [angle (range 180 360 1)]
-                                          (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
-        ;;        (fn [_]
-        ;;           (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)
-        ;;                               id (:_id event)
-        ;;                               animation ((keyword id) @event-animations)
-        ;;                               current-angle (:angle animation 180)]
-        ;;                           (swap! event-animations #(assoc %1 (keyword id) {:direction :clockwise :angle current-angle}) )
-        ;;                           (rotate-event id :clockwise (range current-angle 0 -1))
-        ;;                           ))
-        ;;           )
 
         :handleMouseEnter
         (fn [_]  (this-as this (let [event-id (:_id (js->clj (.. this -props -event) :keywordize-keys true))]
-                                 (dorun (for [angle (range 0 180 1)]
-                                          (go (async/>! rotations-channel {:id event-id :angle angle})) ))) ))
-
-        ;;         (fn [_]
-        ;;           (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)
-        ;;                               id (:_id event)
-        ;;                               animation ((keyword id) @event-animations)
-        ;;                               current-angle (:angle animation 0)]
-        ;;                           (swap! event-animations #(assoc %1 (keyword id) {:direction :anticlockwise :angle current-angle}) )
-        ;;                           (rotate-event id :anticlockwise (range current-angle 0 -1))
-        ;;                           ))
-        ;;           )
-
-
-        ;;         (fn [_] (this-as this (let [event (js->clj (.. this -props -event) :keywordize-keys true)]
-        ;;                                 (if (not (contains? @visited-events (:_id event))) (swap! visited-events conj (:_id event)) )  )))
+                                 (if (not (contains? @visited-events event-id)) (swap! visited-events conj event-id) )
+                                 ) ))
 
         }
    )
   )
+
+(def EventFactory (js/React.createFactory Event))
 
 
 (def EventUniverse
@@ -195,14 +168,14 @@
 
         :render
         (fn []
-          (this-as this (div #js {:style #js {:width "100%" :height "100%"}
+          (this-as this (js/React.DOM.div #js {:style #js {:width "100%" :height "100%"}
                                   :tabIndex "1"
                                   :onWheel (.. this -handleMouseWheel)
                                   :onKeyDown (.. this -handleKeyDown)
                                   }
                              (let [offsets {:x @x-translation :y @y-translation :z @z-translation}]
-                               (into-array (concat (map #(OriginMarker #js {:marker % :offsets offsets}) (.. this -state -markers))
-                                                   (map #(Event #js {:event % :offsets offsets}) (.. this -state -events) ) ))
+                               (into-array (concat (map #(OriginMarkerFactory #js {:marker % :offsets offsets}) (.. this -state -markers))
+                                                   (map #(EventFactory #js {:event % :offsets offsets}) (.. this -state -events) ) ))
                                ))
           ) )
 
@@ -224,7 +197,7 @@
         (fn [event]
           (.preventDefault event)
           (let [keyCode (.-keyCode event)]
-             (let [deltas (get-pan-deltas keyCode 5)]
+             (let [deltas (get-pan-deltas keyCode 3)]
                (if deltas
                  (dispatch-deltas deltas)
                   )
@@ -236,30 +209,20 @@
 )
 
 
-(def event-universe (EventUniverse))
+(def event-universe (js/React.render
+                      ((js/React.createFactory EventUniverse))
+                      (.getElementById js/document "events")))
 
+;(js/React.render
+;  ((js/React.createFactory EventUniverse))
+;  (.getElementById js/document "events"))
 
-(defn update-ui [] (.forceUpdate event-universe))
+; kick off automated rotation animation for pushed events.
+(rotate-events (cycle (range 0 360 1)))
 
-(defn rotate-events [angles]
-  (swap! rotation #(first angles))
-  (update-ui)
-  (js/setTimeout rotate-events 10 (rest angles))
-)
-
-(js/React.renderComponent
- event-universe
- (.getElementById js/document "events"))
-
-; kick off rotation animation for pushed events.
-;(rotate-events (cycle (range 0 360 1)))
-
-; kick off event loop for processing event card rotations.
-(def interval 10)
-
-
+; kick off event loop for processing event card flips via user interaction.
 (go (while true
-      (async/<! (async/timeout interval))
+      (async/<! (async/timeout 10))
       (let [rotation (async/<! rotations-channel)]
         (swap! event-rotations #(assoc %1 (keyword (:id rotation)) (:angle rotation)))
         (update-ui)

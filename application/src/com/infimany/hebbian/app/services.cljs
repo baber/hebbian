@@ -6,7 +6,7 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
 (def user-port "3001")
-(def event-port "3000")
+(def event-port "3002")
 
 
 ; user services.

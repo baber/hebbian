@@ -2,7 +2,7 @@
 
 )
 
-(def radius 6371)
+(def radius 6371) ; approx earth radius in km.
 
 (defn rad [n]
   (* n (/ js/Math.PI 180))
@@ -12,7 +12,7 @@
 
 
 (defn distance
-  "Returns distance between two lat/long locations based on Haversine formula.
+  "Returns distance (in km) between two lat/long locations based on Haversine formula.
   See: http://www.movable-type.co.uk/scripts/latlong.html"
   [loc1 loc2]
   (let [dLat (rad (- (:lat loc2) (:lat loc1))) dLng (rad (- (:lng loc2) (:lng loc1)))]
@@ -24,8 +24,4 @@
     )
 
   )
-
-
-
-; (distance  {:lat 51.746803 :lng -0.455394} {:lat 51.736275 :lng -0.465543})
 
