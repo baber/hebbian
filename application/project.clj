@@ -14,8 +14,8 @@
 
 
 
-            :repl-options {
-                           :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+;;             :repl-options {
+;;                            :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
             :plugins [[lein-cljsbuild "1.0.6"]
                       [lein-ring "0.9.3"]]
 

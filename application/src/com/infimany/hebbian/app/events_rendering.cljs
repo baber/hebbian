@@ -6,7 +6,6 @@
    [com.infimany.hebbian.app.services :as services]
    [com.infimany.hebbian.app.ui-components.events :as event-ui]
    [com.infimany.hebbian.app.ui-components.controls :as controls-ui]
-   [com.infimany.hebbian.app.geolocation-utils :as geoloc]
    [cljsjs.moment :as moment]
    )
 
@@ -39,24 +38,24 @@
 ; positioning functions.
 
 
-(defn get-distance [{{coords :coordinates} :geolocation}]
-  (.toFixed (geoloc/distance {:lng (first coords) :lat (last coords)} @controls-ui/origin) 2) )
+;; (defn get-distance [{{coords :coordinates} :geolocation}]
+;;   (.toFixed (geoloc/distance {:lng (first coords) :lat (last coords)} @controls-ui/origin) 2) )
 
-(defn scale-translate [point]
-  [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
-)
+;; (defn scale-translate [point]
+;;   [(int (+ (:x screen-origin) (* scale (:x point)))) (int (+ (:y screen-origin) (* scale (:y point))))]
+;; )
 
 (defn move-event-to-center [point]
   [(- (first point) event-x-translation) (- (last point) event-y-translation )]
 )
 
 (defn get-screen-loc [{{coords :coordinates} :geolocation}]
-  (move-event-to-center (scale-translate {:x (- (first coords) (:lng @controls-ui/origin)) :y (- (:lat @controls-ui/origin) (last coords))}))
+  (move-event-to-center [(:x screen-origin) (:y screen-origin)])
 )
 
 (defn add-z-plane [events]
   (let [now (js/moment) hours (* 1000 60 60)]
-    (map #(assoc % :z-plane (int (/ (.diff now (js/moment (:start-time %) date-fmt)) hours)) ) events )
+    (map #(assoc % :z-plane (int (/ (.diff now (js/moment (:timestamp %) date-fmt)) hours)) ) events )
     )
   )
 
@@ -64,20 +63,19 @@
 
 (defn to-renderable [event]
   (merge event {:status :normal}
-         {:distance (get-distance event)}
          {:screen-location (get-screen-loc event)}))
 
 
 (defn convert-times [event]
-  (reduce #(update-in event [%] js/moment date-fmt) [:start-time :end-time])
+  (update-in event [:timestamp] js/moment date-fmt)
 )
 
 
-(defn generate-origin-markers [_]
-  (let [z-planes (map #(:z-plane %) @events) min-z (apply min z-planes) max-z (apply max z-planes)]
-    (for [z-plane (range max-z min-z -200)] {:z-plane z-plane :screen-location [(:x screen-origin) (:y screen-origin)]})
-    )
-)
+;; (defn generate-origin-markers [_]
+;;   (let [z-planes (map #(:z-plane %) @events) min-z (apply min z-planes) max-z (apply max z-planes)]
+;;     (for [z-plane (range max-z min-z -200)] {:z-plane z-plane :screen-location [(:x screen-origin) (:y screen-origin)]})
+;;     )
+;; )
 
 
 
@@ -107,11 +105,11 @@
 
 (defn reload [new-events]
   (swap! events #(map to-renderable (add-z-plane (map convert-times %2))) new-events )
-  (swap! markers generate-origin-markers)
+  ;(swap! markers generate-origin-markers)
 )
 
 (defn update-ui-state []
-  (.setState event-ui/event-universe #js {:events (clj->js @events)  :markers (clj->js @markers)})
+  (.setState event-ui/event-universe #js {:events (clj->js @events)})
 )
 
 ; kick off event loop.
@@ -126,16 +124,16 @@
 
 ; new event notifications
 
-(def event-source (js/EventSource. "http://localhost:3002/event/updates"))
+;(def event-source (js/EventSource. "http://localhost:3002/event/updates"))
 
 
-(defn new-event-handler [event]
-  (let [event  (.-data event)]
-    (swap! events (partial cons (assoc (to-renderable (first (add-z-plane [(convert-times (js->clj (JSON/parse event) :keywordize-keys true))]))) :status :new) ))
-    (update-ui-state)
-    )
-  )
+;; (defn new-event-handler [event]
+;;   (let [event  (.-data event)]
+;;     (swap! events (partial cons (assoc (to-renderable (first (add-z-plane [(convert-times (js->clj (JSON/parse event) :keywordize-keys true))]))) :status :new) ))
+;;     (update-ui-state)
+;;     )
+;;   )
 
 
-(aset event-source "onmessage" new-event-handler)
+;(aset event-source "onmessage" new-event-handler)
 
