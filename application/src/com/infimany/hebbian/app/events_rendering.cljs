@@ -22,7 +22,7 @@
 )
 
 
-(def date-fmt "YYYY-MM-DDThh:mm:ssZ")
+(def date-fmt "YYYY-MM-DD hh:mm:ss")
 (def scale 10000)
 (def width (.-offsetWidth (sel1 :#events)))
 (def height (.-offsetHeight (sel1 :#events)))
